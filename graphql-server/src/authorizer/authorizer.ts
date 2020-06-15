@@ -53,7 +53,6 @@ export const _authorize = (
   permissionPolicy: any,
   midPermissionPolicy: any | undefined
 ): void => {
-
   if (selection.kind !== "Field") return;
   const field = selection as FieldNode;
 

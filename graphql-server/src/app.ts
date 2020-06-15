@@ -53,7 +53,6 @@ class App {
         throw e;
       }
     });
-
     this.express.use("/", router);
   }
 }
