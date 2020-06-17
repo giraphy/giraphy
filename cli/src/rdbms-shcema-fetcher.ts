@@ -4,12 +4,12 @@ const knex = require("knex")({
     host: "127.0.0.1",
     user: "root",
     password: "root",
-    database: "example",
+    database: "information_schema",
   },
 });
 
 export const fetchSchema = () => {
-  const result = knex.raw("show create table users;")
+  const result = knex.raw("select * FROM information_schema.columns where table_schema = 'example';")
     .then((a: any) => {
       console.log(a);
     });

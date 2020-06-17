@@ -1,4 +1,4 @@
-import { parseRdbmsDdlToSchema } from './rdbms-schema-parser';
+import { ColumnDefinition, parseRdbmsDdlToSchema } from './rdbms-schema-parser';
 
 // sql共通のinformation_schemaから取得すべき
 // select * FROM information_schema.columns where table_schema = 'example';
@@ -8,27 +8,34 @@ import { parseRdbmsDdlToSchema } from './rdbms-schema-parser';
 
 describe("parseRdbmsDdlToSchema ", () => {
   test("should return GraphQL schema", () => {
-    const ddl = "CREATE TABLE `users` (\n" +
-      "  `user_id` bigint(20) unsigned NOT NULL,\n" +
-      "  `email` varchar(100) COLLATE utf8mb4_bin NOT NULL,\n" +
-      "  PRIMARY KEY (`user_id`)\n" +
-      ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin";
 
-    expect(parseRdbmsDdlToSchema(ddl)).toEqual({
-      table: "users",
-      primaryKey: "user_id",
-      columns: [
-        {
-          name: "user_id",
-          type: "bigint",
-          notNull: true
-        },
-        {
-          name: "email",
-          type: "varchar",
-          notNull: true
-        }
-      ]
-    });
+    const columnDefinitions: ColumnDefinition[] = [
+      {
+        COLUMN_NAME: "user_id",
+        DATA_TYPE: "bigint",
+        COLUMN_KEY: "PRI",
+      },
+      {
+        COLUMN_NAME: "email",
+        DATA_TYPE: "text",
+        COLUMN_KEY: "",
+      },
+    ];
+
+    expect(parseRdbmsDdlToSchema("users", columnDefinitions)).toBe(
+      'const Users: GraphQLObjectType = new GraphQLObjectType({\n' +
+      '  name: "Users",\n' +
+      '  sqlTable: "users",\n' +
+      '  uniqueKey: "user_id",\n' +
+      '  fields: () => ({\n' +
+      '    user_id: {\n' +
+      '      type: GraphQLString,\n' +
+      '    },\n' +
+      '    email: {\n' +
+      '      type: GraphQLString,\n' +
+      '    },\n' +
+      '  }),\n' +
+      '});'
+    );
   });
 });
