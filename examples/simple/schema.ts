@@ -4,34 +4,11 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
+  GraphQLSchema,
 } from "graphql";
 
 import joinMonster from "join-monster";
 import { dbCall } from "./rdbms-client";
-
-const Comments: GraphQLObjectType = new GraphQLObjectType({
-  name: "Comments",
-  sqlTable: "COMMENTS",
-  uniqueKey: "comment_id",
-  fields: () => ({
-    comment_id: {
-      type: GraphQLString,
-    },
-  }),
-});
-const comments = {
-  type: new GraphQLList(Comments),
-  resolve: (parent, args, context, resolveInfo) =>
-    joinMonster(resolveInfo, context, (sql: any) =>
-      dbCall(sql, knex, context)
-    ),
-  args: {
-    comment_id: { type: GraphQLString },
-  },
-  where: (commentsTable, args, context) => {
-    if (args.comment_id) return `${commentsTable}.comment_id = ${args.comment_id}`;
-  },
-};
 
 const Posts: GraphQLObjectType = new GraphQLObjectType({
   name: "Posts",
@@ -53,7 +30,7 @@ const posts = {
   type: new GraphQLList(Posts),
   resolve: (parent, args, context, resolveInfo) =>
     joinMonster(resolveInfo, context, (sql: any) =>
-      dbCall(sql, knex, context)
+      dbCall(sql, context)
     ),
   args: {
     post_id: { type: GraphQLString },
@@ -84,7 +61,7 @@ const users = {
   type: new GraphQLList(Users),
   resolve: (parent, args, context, resolveInfo) =>
     joinMonster(resolveInfo, context, (sql: any) =>
-      dbCall(sql, knex, context)
+      dbCall(sql, context)
     ),
   args: {
     user_id: { type: GraphQLString },
@@ -96,16 +73,17 @@ const users = {
   },
 };
 
-export default new GraphQLObjectType({
-  description: "global query object",
-  name: "Query",
-  fields: () => ({
-    version: {
-      type: GraphQLString,
-      resolve: () => "0.1",
-    },
-    comments: comments
-    posts: posts
-    users: users
+export const schema = new GraphQLSchema({
+  query: new GraphQLObjectType({
+    description: "global query object",
+    name: "Query",
+    fields: () => ({
+      version: {
+        type: GraphQLString,
+        resolve: () => "0.1",
+      },
+      posts: posts,
+      users: users,
+    }),
   }),
 });

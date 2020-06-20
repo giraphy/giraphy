@@ -36,7 +36,7 @@ describe("parseRdbmsDdlToSchema ", () => {
       '  type: new GraphQLList(Users),\n' +
       '  resolve: (parent, args, context, resolveInfo) =>\n' +
       '    joinMonster(resolveInfo, context, (sql: any) =>\n' +
-      '      dbCall(sql, knex, context)\n' +
+      '      dbCall(sql, context)\n' +
       '    ),\n' +
       '  args: {\n' +
       '    user_id: { type: GraphQLString },\n' +

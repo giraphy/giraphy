@@ -65,7 +65,7 @@ export const tableSchemaToGraphQLSchema = (tableName: string, columnDefinitions:
     `  type: new GraphQLList(${toFirstCharacterUpperCase(lowerCaseTableName)}),\n` +
     `  resolve: (parent, args, context, resolveInfo) =>\n` +
     `    joinMonster(resolveInfo, context, (sql: any) =>\n` +
-    `      dbCall(sql, knex, context)\n` +
+    `      dbCall(sql, context)\n` +
     `    ),\n` +
     `  args: {\n` +
     argsPart +
@@ -84,6 +84,7 @@ const importStatementPart = 'import {\n' +
   '  GraphQLNonNull,\n' +
   '  GraphQLObjectType,\n' +
   '  GraphQLString,\n' +
+  '  GraphQLSchema,\n' +
   '} from "graphql";\n' +
   '\n' +
   'import joinMonster from "join-monster";\n' +
@@ -99,7 +100,7 @@ export const createRdbmsBaseSchema = (tableNames: string[]) => {
   '        type: GraphQLString,\n' +
   '        resolve: () => "0.1",\n' +
   '      },\n' +
-  tableNames.map(tableName => `      ${tableName}: ${tableName}`).join('\n') + '\n' +
+  tableNames.map(tableName => `      ${tableName}: ${tableName}`).join(',\n') + ',\n' +
   '    }),\n' +
   '  }),\n' +
   '});'
