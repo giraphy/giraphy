@@ -14,6 +14,6 @@ export const createRdbmsSchema = async () => {
   const columnResult = await knex.raw(`select table_name, column_name, data_type, column_key from information_schema.columns where table_schema = '${dbSetting.database}';`)
   const columnDefinitions = columnResult[0] as ColumnDefinition[];
   const result = parseRdbmsSchemaToGraphQLSchema(tableRows.map(t => t.table_name), columnDefinitions, dbSetting);
-  fs.writeFileSync('schema.ts', result);
+  fs.writeFileSync('schema.js', result);
   process.exit(0);
 };

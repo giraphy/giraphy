@@ -19,7 +19,7 @@ describe("parseRdbmsDdlToSchema ", () => {
     ];
 
     expect(tableSchemaToGraphQLSchema("users", columnDefinitions)).toBe(
-      'const Users: GraphQLObjectType = new GraphQLObjectType({\n' +
+      'const Users = new GraphQLObjectType({\n' +
       '  name: "Users",\n' +
       '  sqlTable: "users",\n' +
       '  uniqueKey: "user_id",\n' +
@@ -35,7 +35,7 @@ describe("parseRdbmsDdlToSchema ", () => {
       'const users = {\n' +
       '  type: new GraphQLList(Users),\n' +
       '  resolve: (parent, args, context, resolveInfo) =>\n' +
-      '    joinMonster(resolveInfo, context, (sql: any) =>\n' +
+      '    joinMonster.default(resolveInfo, context, (sql) =>\n' +
       '      dbCall(sql, context)\n' +
       '    ),\n' +
       '  args: {\n' +

@@ -55,7 +55,7 @@ export const tableSchemaToGraphQLSchema = (tableName: string, columnDefinitions:
     wherePart = wherePart + `    if (args.${columnDefinition.column_name}) return \`\${${lowerCaseTableName}Table}.${columnDefinition.column_name} = \${args.${columnDefinition.column_name}}\`;\n`
   });
 
-  const tableType = `const ${toFirstCharacterUpperCase(lowerCaseTableName)}: GraphQLObjectType = new GraphQLObjectType({\n` +
+  const tableType = `const ${toFirstCharacterUpperCase(lowerCaseTableName)} = new GraphQLObjectType({\n` +
     `  name: "${toFirstCharacterUpperCase(lowerCaseTableName)}",\n` +
     `  sqlTable: "${tableName}",\n` +
     `  uniqueKey: "${primaryKey}",\n` +
@@ -67,7 +67,7 @@ export const tableSchemaToGraphQLSchema = (tableName: string, columnDefinitions:
   const tableRootQuery = `const ${lowerCaseTableName} = {\n` +
     `  type: new GraphQLList(${toFirstCharacterUpperCase(lowerCaseTableName)}),\n` +
     `  resolve: (parent, args, context, resolveInfo) =>\n` +
-    `    joinMonster(resolveInfo, context, (sql: any) =>\n` +
+    `    joinMonster.default(resolveInfo, context, (sql) =>\n` +
     `      dbCall(sql, context)\n` +
     `    ),\n` +
     `  args: {\n` +
@@ -81,16 +81,19 @@ export const tableSchemaToGraphQLSchema = (tableName: string, columnDefinitions:
   return tableType + tableRootQuery;
 };
 
-const importStatementPart = 'import {\n' +
+const importStatementPart = 'const {\n' +
   '  GraphQLInt,\n' +
   '  GraphQLList,\n' +
   '  GraphQLNonNull,\n' +
   '  GraphQLObjectType,\n' +
   '  GraphQLString,\n' +
   '  GraphQLSchema,\n' +
-  '} from "graphql";\n' +
+  '} = require("graphql");\n' +
   '\n' +
-  'import joinMonster from "join-monster";\n\n';
+  'const __importDefault = (this && this.__importDefault) || function (mod) {\n' +
+  '  return (mod && mod.__esModule) ? mod : { "default": mod };\n' +
+  '};\n' +
+  'const joinMonster = __importDefault(require("join-monster"));\n\n';
 
 const dbCallPart = (dbSetting: DBSetting) => {
   return 'const knex = require("knex")({\n' +
@@ -102,15 +105,15 @@ const dbCallPart = (dbSetting: DBSetting) => {
     `    database: "${dbSetting.database}",\n` +
     '  },\n' +
     '});\n' +
-    'const dbCall = (sql: any, context: any) => {\n' +
+    'const dbCall = (sql, context) => {\n' +
     '  return knex\n' +
     '    .raw(sql.split(\'"\').join(""))\n' +
-    '    .then((result: any) => (result.length > 0 ? result[0] : null));\n' +
+    '    .then(result => (result.length > 0 ? result[0] : null));\n' +
     '};\n\n';
 };
 
 export const createRdbmsBaseSchema = (tableNames: string[]) => {
-  return 'export const schema = new GraphQLSchema({\n' +
+  return 'exports.schema = new GraphQLSchema({\n' +
   '  query: new GraphQLObjectType({\n' +
   '    description: "global query object",\n' +
   '    name: "Query",\n' +
