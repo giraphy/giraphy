@@ -59,7 +59,7 @@ export const tableSchemaToGraphQLSchema = (tableName: string, columnDefinitions:
     `  fields: () => ({\n` +
        columnDefinitionPart + relationDefinitionPart +
     `  }),\n` +
-    `});\n`
+    `});\n`;
 
   const tableRootQuery = `const ${lowerCaseTableName} = {\n` +
     `  type: new GraphQLList(${toFirstCharacterUpperCase(lowerCaseTableName)}),\n` +
@@ -73,7 +73,7 @@ export const tableSchemaToGraphQLSchema = (tableName: string, columnDefinitions:
     `  where: (${lowerCaseTableName}Table, args, context) => {\n` +
     wherePart +
     `  },\n` +
-    `};\n`
+    `};\n`;
 
   return tableType + tableRootQuery;
 };
@@ -90,18 +90,20 @@ const importStatementPart = 'import {\n' +
   'import { dbCall } from "./rdbms-client";\n\n';
 
 export const createRdbmsBaseSchema = (tableNames: string[]) => {
-  return 'export default new GraphQLObjectType({\n' +
-  '  description: "global query object",\n' +
-  '  name: "Query",\n' +
-  '  fields: () => ({\n' +
-  '    version: {\n' +
-  '      type: GraphQLString,\n' +
-  '      resolve: () => "0.1",\n' +
-  '    },\n' +
-  tableNames.map(tableName => `    ${tableName}: ${tableName}`).join('\n') + '\n' +
+  return 'export const schema = new GraphQLSchema({\n' +
+  '  query: new GraphQLObjectType({\n' +
+  '    description: "global query object",\n' +
+  '    name: "Query",\n' +
+  '    fields: () => ({\n' +
+  '      version: {\n' +
+  '        type: GraphQLString,\n' +
+  '        resolve: () => "0.1",\n' +
+  '      },\n' +
+  tableNames.map(tableName => `      ${tableName}: ${tableName}`).join('\n') + '\n' +
+  '    }),\n' +
   '  }),\n' +
   '});'
-}
+};
 
 export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefinitions: ColumnDefinition[]): string => {
   return importStatementPart +
@@ -111,4 +113,4 @@ export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefi
       )
     .join("\n") + "\n" +
     createRdbmsBaseSchema(tableNames.map(t => t.toLowerCase()))
-}
+};
