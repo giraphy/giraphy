@@ -1,3 +1,6 @@
+import { DBSetting } from './db-setting';
+import { rdbmsTypeToKnexType } from './knex-client';
+
 export type ColumnDefinition = {
   table_name: string,
   column_name: string,
@@ -87,8 +90,24 @@ const importStatementPart = 'import {\n' +
   '  GraphQLSchema,\n' +
   '} from "graphql";\n' +
   '\n' +
-  'import joinMonster from "join-monster";\n' +
-  'import { dbCall } from "./rdbms-client";\n\n';
+  'import joinMonster from "join-monster";\n\n';
+
+const dbCallPart = (dbSetting: DBSetting) => {
+  return 'const knex = require("knex")({\n' +
+    `  client: "${rdbmsTypeToKnexType(dbSetting.kind)}",\n` +
+    '  connection: {\n' +
+    `    host: "${dbSetting.host}",\n` +
+    `    user: "${dbSetting.user}",\n` +
+    `    password: "${dbSetting.password}",\n` +
+    `    database: "${dbSetting.database}",\n` +
+    '  },\n' +
+    '});\n' +
+    'const dbCall = (sql: any, context: any) => {\n' +
+    '  return knex\n' +
+    '    .raw(sql.split(\'"\').join(""))\n' +
+    '    .then((result: any) => (result.length > 0 ? result[0] : null));\n' +
+    '};\n\n';
+};
 
 export const createRdbmsBaseSchema = (tableNames: string[]) => {
   return 'export const schema = new GraphQLSchema({\n' +
@@ -106,8 +125,9 @@ export const createRdbmsBaseSchema = (tableNames: string[]) => {
   '});'
 };
 
-export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefinitions: ColumnDefinition[]): string => {
+export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefinitions: ColumnDefinition[], dbSetting: DBSetting): string => {
   return importStatementPart +
+    dbCallPart(dbSetting) +
     tableNames
       .map(tableName =>
           tableSchemaToGraphQLSchema(tableName, columnDefinitions.filter(c => c.table_name.toLowerCase() == tableName.toLowerCase()))
