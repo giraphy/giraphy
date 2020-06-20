@@ -1,6 +1,10 @@
+var nodeExternals = require('webpack-node-externals');
+
 module.exports = {
   entry: './src/index.ts',
   target: 'node',
+  mode: 'production',
+  externals: [nodeExternals()],
   module: {
     rules: [
       {

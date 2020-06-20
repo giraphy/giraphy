@@ -1,22 +1,24 @@
-import { ColumnDefinition, parseRdbmsDdlToSchema } from './rdbms-schema-parser';
+import { ColumnDefinition, tableSchemaToGraphQLSchema } from './rdbms-schema-parser';
 
 describe("parseRdbmsDdlToSchema ", () => {
   test("should return GraphQL schema", () => {
 
     const columnDefinitions: ColumnDefinition[] = [
       {
-        COLUMN_NAME: "user_id",
-        DATA_TYPE: "bigint",
-        COLUMN_KEY: "PRI",
+        table_name: "users",
+        column_name: "user_id",
+        data_type: "bigint",
+        column_key: "PRI",
       },
       {
-        COLUMN_NAME: "email",
-        DATA_TYPE: "text",
-        COLUMN_KEY: "",
+        table_name: "users",
+        column_name: "email",
+        data_type: "text",
+        column_key: "",
       },
     ];
 
-    expect(parseRdbmsDdlToSchema("users", columnDefinitions)).toBe(
+    expect(tableSchemaToGraphQLSchema("users", columnDefinitions)).toBe(
       'const Users: GraphQLObjectType = new GraphQLObjectType({\n' +
       '  name: "Users",\n' +
       '  sqlTable: "users",\n' +

@@ -1,4 +1,6 @@
 .idea
+bin
+giraphy.json
 
 # Logs
 logs
