@@ -1,4 +1,4 @@
-# Server Build
+# Build
 FROM node:10.17.0 as build-stage
 ADD ./ /app/
 WORKDIR /app/graphql-server

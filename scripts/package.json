@@ -10,7 +10,8 @@
     "test": "jest",
     "test-watch": "jest --watch"
   },
-  "author": "",
+  "author": "giraphy",
+  "organization": "giraphy",
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^26.0.0",
@@ -26,7 +27,7 @@
     "webpack-node-externals": "^1.7.2"
   },
   "bin": {
-    "giraphy": "./bin/giraphy.js"
+    "giraphy-cli": "bin/giraphy-cli.js"
   },
   "dependencies": {
     "aws-sdk": "^2.700.0",
