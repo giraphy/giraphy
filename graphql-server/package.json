@@ -1,7 +1,7 @@
 {
-  "name": "rdbms-executor",
-  "version": "1.0.0",
-  "description": "",
+  "name": "giraphy",
+  "version": "0.1.0",
+  "description": "No Code & Secure GraphQL Server for RDBMS",
   "main": "index.js",
   "scripts": {
     "start": "npm run build:live",
@@ -12,7 +12,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/express": "^4.17.6",
     "@types/express-graphql": "0.8.0",

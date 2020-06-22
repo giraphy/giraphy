@@ -2,11 +2,11 @@ import express from "express";
 import graphqlHTTP from "express-graphql";
 
 import * as core from "express-serve-static-core";
-import { schema } from "./schema";
+import { schema } from "./conf/schema";
 import bodyParser from "body-parser";
 import { parse, Source } from "graphql";
 import { authorize } from "./authorizer/authorizer";
-import { permissionPolicy } from "./permission-policy";
+import { permissionPolicy } from "./conf/permission-policy";
 import { authenticate } from "./authenticator/authenticator";
 
 class App {

@@ -1,9 +1,8 @@
 {
-
   "db": {
     "kind": "MySQL",
     "version": "5.7",
-    "host": "127.0.0.1",
+    "host": "mysql",
     "user": "root",
     "password": "root",
     "database": "example"

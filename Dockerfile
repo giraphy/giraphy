@@ -1,4 +1,4 @@
-# Build
+# Server Build
 FROM node:10.17.0 as build-stage
 ADD ./ /app/
 WORKDIR /app/graphql-server
@@ -18,4 +18,4 @@ COPY --from=build-stage /app/scripts/dist /app/scripts/dist
 COPY --from=build-stage /app/scripts/node_modules /app/scripts/node_modules
 WORKDIR /app/graphql-server
 EXPOSE 3000
-CMD [ "node", "./lib/index.js" ]
+CMD [ "node", "/app/graphql-server/lib/index.js" ]
