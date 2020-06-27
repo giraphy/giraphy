@@ -48,7 +48,12 @@
     "mysql": "^2.18.1",
     "sqlite3": "^4.2.0"
   },
-  "peerDependencies": {
-    "lodash": "4.17.12"
-  }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giraphy/giraphy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/giraphy/giraphy/issues"
+  },
+  "homepage": "https://github.com/giraphy/giraphy#readme"
 }

@@ -16,6 +16,9 @@ COPY --from=build-stage /app/graphql-server/lib /app/graphql-server/lib
 COPY --from=build-stage /app/graphql-server/node_modules /app/graphql-server/node_modules
 COPY --from=build-stage /app/scripts/dist /app/scripts/dist
 COPY --from=build-stage /app/scripts/node_modules /app/scripts/node_modules
-WORKDIR /app/graphql-server
+COPY --from=build-stage /app/scripts/node_modules /app/scripts/node_modules
+COPY --from=build-stage /app/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+WORKDIR /app/
 EXPOSE 3000
-CMD [ "node", "/app/graphql-server/lib/index.js" ]
+ENTRYPOINT ["/app/entrypoint.sh"]
