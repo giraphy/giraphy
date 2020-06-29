@@ -1,0 +1,30 @@
+{
+  "users": [
+    {
+      "name": "comments",
+      "type": "hasMany",
+      "from": {
+        "table": "users",
+        "column": "user_id"
+      },
+      "to": {
+        "table": "comments",
+        "column": "user_id"
+      }
+    }
+  ],
+  "comments": [
+    {
+      "name": "user",
+      "type": "hasOne",
+      "from": {
+        "table": "comments",
+        "column": "user_id"
+      },
+      "target": {
+        "table": "users",
+        "column": "user_id"
+      }
+    }
+  ]
+}

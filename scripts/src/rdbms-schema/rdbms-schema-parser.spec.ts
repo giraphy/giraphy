@@ -1,4 +1,4 @@
-import { ColumnDefinition, tableSchemaToGraphQLSchema } from './rdbms-schema-parser';
+import { ColumnDefinition, RelationDefinition, tableSchemaToGraphQLSchema } from './rdbms-schema-parser';
 
 describe("parseRdbmsDdlToSchema ", () => {
   test("should return GraphQL schema", () => {
@@ -18,7 +18,22 @@ describe("parseRdbmsDdlToSchema ", () => {
       },
     ];
 
-    expect(tableSchemaToGraphQLSchema("users", columnDefinitions)).toBe(
+    const relationDefinitions: RelationDefinition[] = [
+      {
+        name: "comments",
+        type: "hasMany",
+        from: {
+          table: "users",
+          column: "user_id"
+        },
+        to: {
+          table: "comments",
+          column: "user_id"
+        }
+      }
+    ];
+
+    expect(tableSchemaToGraphQLSchema("users", columnDefinitions, relationDefinitions)).toBe(
       'const Users = new GraphQLObjectType({\n' +
       '  name: "Users",\n' +
       '  sqlTable: "users",\n' +
@@ -29,6 +44,11 @@ describe("parseRdbmsDdlToSchema ", () => {
       '    },\n' +
       '    email: {\n' +
       '      type: GraphQLString,\n' +
+      '    },\n' +
+      '    comments: {\n' +
+      '      type: new GraphQLList(Comments),\n' +
+      '      sqlJoin: (usersTable, commentsTable) =>\n' +
+      '        `${usersTable}.user_id = ${commentsTable}.user_id`,\n' +
       '    },\n' +
       '  }),\n' +
       '});\n' +
