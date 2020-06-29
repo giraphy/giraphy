@@ -1,5 +1,6 @@
 import { DBSetting } from './db-setting';
 import { rdbmsTypeToKnexType } from './knex-client';
+import { RelationSetting } from './relation-setting';
 
 export type ColumnDefinition = {
   table_name: string,
@@ -159,12 +160,12 @@ export const createRdbmsBaseSchema = (tableNames: string[]) => {
   '});'
 };
 
-export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefinitions: ColumnDefinition[], relationDefinitions: RelationDefinition[], dbSetting: DBSetting): string => {
+export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefinitions: ColumnDefinition[], dbSetting: DBSetting, relationSetting: RelationSetting): string => {
   return importStatementPart +
     dbCallPart(dbSetting) +
     tableNames
       .map(tableName =>
-          tableSchemaToGraphQLSchema(tableName, columnDefinitions.filter(c => c.table_name.toLowerCase() == tableName.toLowerCase()), relationDefinitions)
+        tableSchemaToGraphQLSchema(tableName, columnDefinitions.filter(c => c.table_name.toLowerCase() == tableName.toLowerCase()), relationSetting[tableName.toLowerCase()])
       )
     .join("\n") + "\n" +
     createRdbmsBaseSchema(tableNames.map(t => t.toLowerCase()))
