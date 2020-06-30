@@ -9,7 +9,7 @@ export type ColumnDefinition = {
   column_key: string,
 }
 
-type RelationType = 'hasOne' | 'hasMany';
+export type RelationType = 'hasOne' | 'hasMany';
 
 export type RelationDefinition = {
   name: string,
@@ -164,9 +164,16 @@ export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefi
   return importStatementPart +
     dbCallPart(dbSetting) +
     tableNames
-      .map(tableName =>
-        tableSchemaToGraphQLSchema(tableName, columnDefinitions.filter(c => c.table_name.toLowerCase() == tableName.toLowerCase()), relationSetting[tableName.toLowerCase()])
-      )
+      .map(tableName => {
+        const relationDefinitionMap = relationSetting[tableName.toLowerCase()];
+        const relationDefinitions = Object.keys(relationDefinitionMap).map(relationMapKey =>
+          ({
+            ...relationDefinitionMap[relationMapKey],
+            name: relationMapKey
+          })
+        );
+        return tableSchemaToGraphQLSchema(tableName, columnDefinitions.filter(c => c.table_name.toLowerCase() == tableName.toLowerCase()), relationDefinitions)
+      })
     .join("\n") + "\n" +
     createRdbmsBaseSchema(tableNames.map(t => t.toLowerCase()))
 };

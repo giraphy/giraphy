@@ -18,5 +18,6 @@ export const createKnex = (dbSetting: DBSetting) => require("knex")({
     user: dbSetting.user,
     password: dbSetting.password,
     database: "information_schema",
+    port: dbSetting.port,
   },
 });
