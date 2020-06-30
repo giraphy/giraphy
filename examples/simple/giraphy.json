@@ -2,7 +2,8 @@
   "db": {
     "kind": "MySQL",
     "version": "5.7",
-    "host": "mysql",
+    "host": "127.0.0.1",
+    "port": 3308,
     "user": "root",
     "password": "root",
     "database": "example"

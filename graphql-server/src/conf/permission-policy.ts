@@ -1,2 +1,2 @@
 // PLEASE IMPLEMENT
-export const permissionPolicy = undefined;
+export default undefined;

@@ -1,2 +1,2 @@
 // PLEASE IMPLEMENT
-exports.permissionPolicy = undefined;
+exports.default = undefined;
