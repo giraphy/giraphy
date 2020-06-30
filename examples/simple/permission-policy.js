@@ -1,2 +1,1 @@
-// PLEASE IMPLEMENT
-exports.default = undefined;
+exports.permissionPolicy = undefined;

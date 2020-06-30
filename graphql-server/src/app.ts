@@ -6,7 +6,7 @@ import { schema } from "./schema/schema";
 import bodyParser from "body-parser";
 import { parse, Source } from "graphql";
 import { authorize } from "./authorizer/authorizer";
-import permissionPolicy from "./conf/permission-policy";
+import { permissionPolicy } from "./conf/permission-policy";
 import { authenticate } from "./authenticator/authenticator";
 
 class App {
