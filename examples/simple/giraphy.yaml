@@ -1,0 +1,18 @@
+database:
+  type: MySQL
+  version: 5.7
+  host: mysql
+  user: root
+  password: root
+  database: example
+
+
+relation:
+  users:
+    posts:
+      type: hasOne
+      from: users.user_id
+      to: posts.user_id
+
+
+

@@ -3,7 +3,7 @@ import { ColumnDefinition, parseRdbmsSchemaToGraphQLSchema } from './rdbms-schem
 import { DBSetting } from './db-setting';
 import { createKnex } from './knex-client';
 
-const giraphySetting = JSON.parse(fs.readFileSync('./giraphy.json', 'utf8'));
+const giraphySetting = JSON.parse(fs.readFileSync('./giraphy.yaml', 'utf8'));
 const relationSetting = JSON.parse(fs.readFileSync('./relation.json', 'utf8'));
 const dbSetting: DBSetting = giraphySetting["db"];
 
