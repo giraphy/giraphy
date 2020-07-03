@@ -1,5 +1,5 @@
 export type DBSetting = {
-  kind: "MySQL" | "PostgreSQL" | "SQLite3";
+  type: "MySQL" | "PostgreSQL" | "SQLite3";
   version: string;
   host: string;
   port: number;

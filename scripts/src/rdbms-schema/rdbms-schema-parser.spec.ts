@@ -22,14 +22,8 @@ describe("parseRdbmsDdlToSchema ", () => {
       {
         name: "comments",
         type: "hasMany",
-        from: {
-          table: "users",
-          column: "user_id"
-        },
-        to: {
-          table: "comments",
-          column: "user_id"
-        }
+        from: "users.user_id",
+        to: "comments.user_id"
       }
     ];
 

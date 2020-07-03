@@ -14,15 +14,21 @@ export type RelationType = 'hasOne' | 'hasMany';
 export type RelationDefinition = {
   name: string,
   type: RelationType,
-  from: {
-    table: string,
-    column: string
-  },
-  to: {
-    table: string,
-    column: string,
-  }
+  from: string,
+  to: string
 }
+
+const splitTableAndColumn = (tableAndColumn: string): { table: string, column: string} => {
+  const elements = tableAndColumn.split(".");
+  if (elements.length !== 2) {
+    throw Error(`${tableAndColumn} is invalid for relation target`);
+  }
+
+  return {
+    table: elements[0],
+    column: elements[1]
+  }
+};
 
 const toFirstCharacterUpperCase = (character: string): string => character.charAt(0).toUpperCase() + character.slice(1);
 
@@ -80,10 +86,13 @@ export const tableSchemaToGraphQLSchema = (tableName: string, columnDefinitions:
   });
 
   const relationDefinitionPart = relationDefinitions.map(relationDefinition => {
+    const from = splitTableAndColumn(relationDefinition.from);
+    const to = splitTableAndColumn(relationDefinition.to);
+
     return `    ${relationDefinition.name}: {\n` +
-      `      type: ${parseRelationTypeToGraphQLType(relationDefinition.type, toFirstCharacterUpperCase(relationDefinition.to.table))},\n` +
-      `      sqlJoin: (${relationDefinition.from.table}Table, ${relationDefinition.to.table}Table) =>\n` +
-      `        \`\$\{${relationDefinition.from.table}Table\}.${relationDefinition.from.column} = \$\{${relationDefinition.to.table}Table\}.${relationDefinition.to.column}\`,\n` +
+      `      type: ${parseRelationTypeToGraphQLType(relationDefinition.type, toFirstCharacterUpperCase(to.table))},\n` +
+      `      sqlJoin: (${from.table}Table, ${to.table}Table) =>\n` +
+      `        \`\$\{${from.table}Table\}.${from.column} = \$\{${to.table}Table\}.${to.column}\`,\n` +
       `    },`
   }).join("\n") + "\n";
 
@@ -129,7 +138,7 @@ const importStatementPart = 'const {\n' +
 
 const dbCallPart = (dbSetting: DBSetting) => {
   return 'const knex = require("knex")({\n' +
-    `  client: "${rdbmsTypeToKnexType(dbSetting.kind)}",\n` +
+    `  client: "${rdbmsTypeToKnexType(dbSetting.type)}",\n` +
     '  connection: {\n' +
     `    host: "${dbSetting.host}",\n` +
     `    user: "${dbSetting.user}",\n` +
@@ -160,18 +169,25 @@ export const createRdbmsBaseSchema = (tableNames: string[]) => {
   '});'
 };
 
-export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefinitions: ColumnDefinition[], dbSetting: DBSetting, relationSetting: RelationSetting): string => {
+export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefinitions: ColumnDefinition[], dbSetting: DBSetting, relationSettingMaybe: RelationSetting | undefined): string => {
   return importStatementPart +
     dbCallPart(dbSetting) +
     tableNames
       .map(tableName => {
-        const relationDefinitionMap = relationSetting[tableName.toLowerCase()];
-        const relationDefinitions = Object.keys(relationDefinitionMap).map(relationMapKey =>
-          ({
-            ...relationDefinitionMap[relationMapKey],
-            name: relationMapKey
-          })
-        );
+        let relationDefinitions: RelationDefinition[] = [];
+        if (relationSettingMaybe) {
+          const relationDefinitionMapMaybe = relationSettingMaybe[tableName.toLowerCase()];
+          if (!relationDefinitionMapMaybe) {
+            return;
+          }
+
+          relationDefinitions = Object.keys(relationDefinitionMapMaybe).map(relationMapKey => {
+            return ({
+              ...relationDefinitionMapMaybe[relationMapKey],
+              name: relationMapKey
+            })
+          });
+        }
         return tableSchemaToGraphQLSchema(tableName, columnDefinitions.filter(c => c.table_name.toLowerCase() == tableName.toLowerCase()), relationDefinitions)
       })
     .join("\n") + "\n" +
