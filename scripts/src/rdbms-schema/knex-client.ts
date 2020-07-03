@@ -12,7 +12,7 @@ export const rdbmsTypeToKnexType = (rdbmsType: RdbmsType): KnexDbType => {
 };
 
 export const createKnex = (dbSetting: DBSetting) => require("knex")({
-  client: rdbmsTypeToKnexType(dbSetting.kind),
+  client: rdbmsTypeToKnexType(dbSetting.type),
   connection: {
     host: dbSetting.host,
     user: dbSetting.user,

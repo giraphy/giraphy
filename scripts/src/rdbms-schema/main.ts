@@ -1,11 +1,21 @@
-import * as fs from 'fs'
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
 import { ColumnDefinition, parseRdbmsSchemaToGraphQLSchema } from './rdbms-schema-parser';
 import { DBSetting } from './db-setting';
 import { createKnex } from './knex-client';
+import { RelationSetting } from './relation-setting';
 
-const giraphySetting = JSON.parse(fs.readFileSync('./giraphy.yaml', 'utf8'));
-const relationSetting = JSON.parse(fs.readFileSync('./relation.json', 'utf8'));
-const dbSetting: DBSetting = giraphySetting["db"];
+const giraphySetting = yaml.safeLoad((fs.readFileSync('./giraphy.yaml', 'utf8'))) as (any | undefined);
+if (!giraphySetting) {
+  throw new Error("giraphy.yaml is required")
+}
+
+const dbSetting: DBSetting | undefined = giraphySetting["database"];
+if (!dbSetting) {
+  throw new Error("database setting is required")
+}
+
+const relationSetting: RelationSetting | undefined = giraphySetting["relation"];
 
 export const createRdbmsSchema = async () => {
   const knex = createKnex(dbSetting);
