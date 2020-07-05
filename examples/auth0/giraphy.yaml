@@ -1,0 +1,28 @@
+database:
+  type: MySQL
+  version: 5.7
+  host: mysql
+  user: root
+  password: root
+  database: example
+
+auth:
+  type: jwt
+  jwksUri: {YOUR_JWKS_URI};
+  issuer: {YOUR_ISSUER};
+  algorithms: [{YOUR_ALGORITHMS}];
+  audience?: {YOUR_AUDIENCE};
+  extraContextWebHook?: {YOUR_EXTEA_CONTEXT_WEBHOOK};
+
+relation:
+  users:
+    comments:
+      type: hasMany
+      from: users.user_id
+      to: comments.user_id
+
+  comments:
+    user:
+      type: hasOne
+      from: comments.user_id
+      to: users.user_id
