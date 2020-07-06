@@ -1,19 +1,22 @@
 import jwt from 'express-jwt';
 import jwksRsa from "jwks-rsa";
 import { AuthSetting } from './setting';
-import { RequestHandler } from 'express';
+import { RequestHandler, Request, Response, NextFunction } from 'express';
 
-export const skipAuthentication = (req: any, res: any, next: any) => next()
+const skipAuthentication = (req: Request<any>, res: Response, next: NextFunction) => next()
 
 export const authenticate = (auth: AuthSetting): RequestHandler => {
+    if (!auth || auth.type !== "jwt") {
+      return skipAuthentication
+    }
     return jwt({
       secret: jwksRsa.expressJwtSecret({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: `https://yuito-work.auth0.com/.well-known/jwks.json`,
+        jwksUri: auth.jwksUri,
       }),
-      issuer: `https://yuito-work.auth0.com/`,
-      algorithms: ["RS256"],
+      issuer: auth.issuer,
+      algorithms: auth.algorithms,
     });
 }

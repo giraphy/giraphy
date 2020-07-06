@@ -1,7 +1,7 @@
 export type AuthSetting = AuthJwtSetting | AuthWebhookSetting | undefined;
 
 type AuthJwtSetting = {
-  kind: "jwt";
+  type: "jwt";
   jwksUri: string;
   issuer: string;
   algorithms: string[];
@@ -10,6 +10,6 @@ type AuthJwtSetting = {
 };
 
 type AuthWebhookSetting = {
-  kind: "webhook";
+  type: "webhook";
   url: string;
 };
