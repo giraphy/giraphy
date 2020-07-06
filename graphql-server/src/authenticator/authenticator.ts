@@ -14,7 +14,7 @@ export const authenticate = (auth: AuthSetting): RequestHandler => {
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: auth.jwksUri,
+        jwksUri: auth.secret.jwksUri,
       }),
       issuer: auth.issuer,
       algorithms: auth.algorithms,

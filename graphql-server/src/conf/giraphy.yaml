@@ -8,9 +8,10 @@ database:
 
 auth:
   type: jwt
-  jwksUri: https://yuito-work.auth0.com/.well-known/jwks.json
   issuer: https://yuito-work.auth0.com/
   algorithms: [ RS256 ]
+  secret:
+    jwksUri: https://yuito-work.auth0.com/.well-known/jwks.json
 
 relation:
   users:
