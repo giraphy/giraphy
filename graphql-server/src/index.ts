@@ -1,7 +1,7 @@
-import app from "./app";
+import { schema } from './schema/schema';
+import graphqlHTTP = require('express-graphql');
 
-const port = process.env.PORT || 3000;
-
-app.listen(port, () => {
-  return console.log(`server is listening on ${port}`);
+export default graphqlHTTP({
+  schema,
+  graphiql: true
 });

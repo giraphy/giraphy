@@ -8,7 +8,7 @@
     "prepare": "webpack --config webpack.config.js",
     "watch": "webpack --config webpack.dev.js --watch  --mode development",
     "test": "jest",
-    "test-watch": "jest --watch"
+    "test-watch": "jest --watch",
   },
   "author": "giraphy",
   "organization": "giraphy",
