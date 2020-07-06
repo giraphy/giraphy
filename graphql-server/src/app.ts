@@ -1,4 +1,4 @@
-import express from "express";
+import express, { RequestHandler } from "express";
 import graphqlHTTP from "express-graphql";
 
 import * as core from "express-serve-static-core";
@@ -7,7 +7,7 @@ import bodyParser from "body-parser";
 import { parse, Source } from "graphql";
 import { authorize } from "./authorizer/authorizer";
 import { permissionPolicy } from "./conf/permission-policy";
-import { authenticate } from "./authenticator/authenticator";
+import { authenticate, skipAuthentication } from "./authenticator/authenticator";
 import fs from "fs";
 import * as yaml from 'js-yaml';
 import { AuthSetting } from './authenticator/setting';
@@ -23,15 +23,25 @@ class App {
     this.mountRoutes();
   }
 
+  private getAuthenticateHandler(authSettingMaybe: AuthSetting): RequestHandler {
+    if (!authSettingMaybe) {
+      return skipAuthentication
+    } else {
+      return authenticate(authSettingMaybe)
+    }
+  }
+
   private mountRoutes(): void {
     const router = express.Router();
 
-    const giraphySetting = yaml.safeLoad((fs.readFileSync('./giraphy.yaml', 'utf8'))) as (any | undefined);
+    const giraphySetting = yaml.safeLoad((fs.readFileSync('src/conf/giraphy.yaml', 'utf8'))) as (any | undefined);
     if (!giraphySetting) {
       throw new Error("giraphy.yaml is required")
     }
 
-    router.post("/graphql", authenticate(giraphySetting.auth as AuthSetting), (req, res) => {
+    const authSettingMaybe = giraphySetting.auth as AuthSetting | undefined
+
+    router.post("/graphql", this.getAuthenticateHandler(authSettingMaybe), (req, res) => {
       const document = parse(new Source(req.body["query"]));
       const context = (req as any)["user"] ? (req as any)["user"] : {};
       try {
