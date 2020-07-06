@@ -10,6 +10,7 @@ import { permissionPolicy } from "./conf/permission-policy";
 import { authenticate } from "./authenticator/authenticator";
 
 export const app = (request: Request, response: Response) => {
+  authenticate()
 
 
 
@@ -18,7 +19,6 @@ export const app = (request: Request, response: Response) => {
     graphiql: true
   })
 };
-
 
 // class App {
 //   public express: core.Express;
