@@ -16,6 +16,24 @@ describe("parseRdbmsDdlToSchema ", () => {
         data_type: "text",
         column_key: "",
       },
+      {
+        table_name: "comments",
+        column_name: "comment_id",
+        data_type: "bigint",
+        column_key: "PRI"
+      },
+      {
+        table_name: "comments",
+        column_name: "user_id",
+        data_type: "bigint",
+        column_key: "FRI"
+      },
+      {
+        table_name: "comments",
+        column_name: "body",
+        data_type: "text",
+        column_key: ""
+      }
     ];
 
     const relationDefinitions: RelationDefinition[] = [
@@ -41,6 +59,16 @@ describe("parseRdbmsDdlToSchema ", () => {
       '    },\n' +
       '    comments: {\n' +
       '      type: new GraphQLList(Comments),\n' +
+      // '      args: {\n' +
+      // '        comment_id: { type: GraphQLString },\n' +
+      // '        user_id: { type: GraphQLString },\n' +
+      // '        body: { type: GraphQLString },\n' +
+      // '      },\n' +
+      // '      where: (commentsTable, args, context) => {\n' +
+      // '        if (args.comment_id) return `${commentsTable}.comment_id = ${args.comment_id};`\n' +
+      // '        if (args.user_id) return `${commentsTable}.user_id = ${args.user_id};`\n' +
+      // '        if (args.body) return `${commentsTable}.body = ${args.body};`\n' +
+      // '      },\n' +
       '      sqlJoin: (usersTable, commentsTable) =>\n' +
       '        `${usersTable}.user_id = ${commentsTable}.user_id`,\n' +
       '    },\n' +

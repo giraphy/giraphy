@@ -1,34 +1,14 @@
 import { DBSetting } from './db-setting';
 import { rdbmsTypeToKnexType } from './knex-client';
 import { RelationSetting } from './relation-setting';
-
-export type ColumnDefinition = {
-  table_name: string,
-  column_name: string,
-  data_type: string,
-  column_key: string,
-}
-
-export type RelationType = 'hasOne' | 'hasMany';
-
-export type RelationDefinition = {
-  name: string,
-  type: RelationType,
-  from: string,
-  to: string
-}
-
-const splitTableAndColumn = (tableAndColumn: string): { table: string, column: string} => {
-  const elements = tableAndColumn.split(".");
-  if (elements.length !== 2) {
-    throw Error(`${tableAndColumn} is invalid for relation target`);
-  }
-
-  return {
-    table: elements[0],
-    column: elements[1]
-  }
-};
+import {
+  ColumnDefinition,
+  getPrimaryKey,
+  parseToColumnDefinitionPart,
+  parseToArgsPart,
+  parseToWherePart
+} from './column-definition';
+import { parseToRelationPart, RelationDefinition } from './relation-definition';
 
 const toFirstCharacterUpperCase = (character: string): string => character.charAt(0).toUpperCase() + character.slice(1);
 
@@ -39,62 +19,15 @@ const columnDefinitionToLowerCase = (columnDefinition: ColumnDefinition): Column
   column_key: columnDefinition.column_key.toLowerCase()
 });
 
-const parseRdbmsDataTypeToGraphQlDataType = (rdbmsDataType: string): string => {
-  switch (rdbmsDataType.toUpperCase()) {
-    case "VARCHAR":
-    case "TEXT":
-    case "LONGTEXT":
-    case "BIGINT":
-      return "GraphQLString";
-    case "Int":
-      return "GraphQLInt";
-    default:
-      return "GraphQLString";
-      // TODO
-  }
-};
-
-const parseRelationTypeToGraphQLType = (relationType: RelationType, targetType: string): string => {
-  switch (relationType) {
-    case 'hasMany':
-      return `new GraphQLList(${targetType})`;
-    case 'hasOne':
-      return targetType;
-  }
-};
-
-export const tableSchemaToGraphQLSchema = (tableName: string, columnDefinitions: ColumnDefinition[], relationDefinitions: RelationDefinition[]): string => {
+export const tableSchemaToGraphQLSchema = (tableName: string, allColumnDefinitions: ColumnDefinition[], relationDefinitions: RelationDefinition[]): string => {
+  const targetColumnDefinitions = allColumnDefinitions.filter(c => c.table_name.toLowerCase() == tableName.toLowerCase()).map(c => columnDefinitionToLowerCase(c));
   const lowerCaseTableName = tableName.toLowerCase();
-  columnDefinitions = columnDefinitions.map(c => columnDefinitionToLowerCase(c));
 
-  let primaryKey = "";
-  let columnDefinitionPart = "";
-  let argsPart = "";
-  let wherePart = "";
-
-  columnDefinitions.forEach(columnDefinition => {
-    if (columnDefinition.column_key === "pri") {
-      primaryKey = columnDefinition.column_name
-    }
-    columnDefinitionPart = columnDefinitionPart + (`    ${columnDefinition.column_name}: {\n` +
-    `      type: ${parseRdbmsDataTypeToGraphQlDataType(columnDefinition.data_type)},\n` +
-    `    },\n`);
-
-    argsPart = argsPart + `    ${columnDefinition.column_name}: { type: ${parseRdbmsDataTypeToGraphQlDataType(columnDefinition.data_type)} },\n`;
-
-    wherePart = wherePart + `    if (args.${columnDefinition.column_name}) return \`\${${lowerCaseTableName}Table}.${columnDefinition.column_name} = \${args.${columnDefinition.column_name}}\`;\n`
-  });
-
-  const relationDefinitionPart = relationDefinitions.map(relationDefinition => {
-    const from = splitTableAndColumn(relationDefinition.from);
-    const to = splitTableAndColumn(relationDefinition.to);
-
-    return `    ${relationDefinition.name}: {\n` +
-      `      type: ${parseRelationTypeToGraphQLType(relationDefinition.type, toFirstCharacterUpperCase(to.table))},\n` +
-      `      sqlJoin: (${from.table}Table, ${to.table}Table) =>\n` +
-      `        \`\$\{${from.table}Table\}.${from.column} = \$\{${to.table}Table\}.${to.column}\`,\n` +
-      `    },`
-  }).join("\n") + "\n";
+  const primaryKey = getPrimaryKey(targetColumnDefinitions);
+  const columnDefinitionPart = parseToColumnDefinitionPart(targetColumnDefinitions);
+  const argsPart = parseToArgsPart(targetColumnDefinitions);
+  const wherePart = parseToWherePart(targetColumnDefinitions, lowerCaseTableName);
+  const relationDefinitionPart = parseToRelationPart(relationDefinitions);
 
   const tableType = `const ${toFirstCharacterUpperCase(lowerCaseTableName)} = new GraphQLObjectType({\n` +
     `  name: "${toFirstCharacterUpperCase(lowerCaseTableName)}",\n` +
@@ -188,7 +121,7 @@ export const parseRdbmsSchemaToGraphQLSchema = (tableNames: string[], columnDefi
             })
           });
         }
-        return tableSchemaToGraphQLSchema(tableName, columnDefinitions.filter(c => c.table_name.toLowerCase() == tableName.toLowerCase()), relationDefinitions)
+        return tableSchemaToGraphQLSchema(tableName, columnDefinitions, relationDefinitions)
       })
     .join("\n") + "\n" +
     createRdbmsBaseSchema(tableNames.map(t => t.toLowerCase()))
