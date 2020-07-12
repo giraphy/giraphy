@@ -8,6 +8,9 @@ import { parse, Source } from "graphql";
 import { authorize } from "./authorizer/authorizer";
 import { permissionPolicy } from "./conf/permission-policy";
 import { authenticate } from "./authenticator/authenticator";
+import fs from "fs";
+import * as yaml from 'js-yaml';
+import { AuthSetting } from './authenticator/setting';
 
 class App {
   public express: core.Express;
@@ -23,7 +26,14 @@ class App {
   private mountRoutes(): void {
     const router = express.Router();
 
-    router.post("/graphql", authenticate, (req, res) => {
+    const giraphySetting = yaml.safeLoad((fs.readFileSync('src/conf/giraphy.yaml', 'utf8'))) as (any | undefined);
+    if (!giraphySetting) {
+      throw new Error("giraphy.yaml is required")
+    }
+
+    const authSettingMaybe = giraphySetting.auth as AuthSetting
+
+    router.post("/graphql", authenticate(authSettingMaybe), (req, res) => {
       const document = parse(new Source(req.body["query"]));
       const context = (req as any)["user"] ? (req as any)["user"] : {};
       try {
