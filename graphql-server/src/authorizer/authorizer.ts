@@ -77,7 +77,7 @@ export const _authorize = (
       argumentData,
       context,
       permissionPolicy,
-      midPermissionPolicy[field.name.value]
+      typeof midPermissionPolicy !== "undefined" ? midPermissionPolicy[field.name.value] : undefined
     );
   });
 };
@@ -92,6 +92,7 @@ export const authorize = (
       const operation = definition as OperationDefinitionNode;
       operation.selectionSet.selections.forEach((selection: SelectionNode) => {
         const argumentData = getArgumentData(selection, {});
+        console.log(argumentData);
         _authorize(
           selection,
           argumentData,

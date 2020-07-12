@@ -13,6 +13,20 @@ auth:
   secret:
     jwksUri: https://yuito-work.auth0.com/.well-known/jwks.json
 
+
+users:
+  $conditions:
+    - [ data.user_id, toBe, context.userId ]
+  comments:
+    $conditions:
+      - [ ]
+      - []
+    $relation:
+      type: hasMany
+      from: users.user_id
+      to: comments.user_id
+
+
 relation:
   users:
     comments:
