@@ -28,9 +28,18 @@ export const parseToArgsPart = (columnDefinitions: ColumnDefinition[]): string =
 };
 
 export const parseToWherePart = (columnDefinitions: ColumnDefinition[], lowerCaseTableName: string): string => {
-  return columnDefinitions.map(columnDefinition =>
-    `    if (args.${columnDefinition.column_name}) return \`\${${lowerCaseTableName}Table}.${columnDefinition.column_name} = \${SqlString.escape(args.${columnDefinition.column_name})}\`;\n`
-  ).join("");
+  const base = `    let condition = "";\n`;
+
+  return base + columnDefinitions.map((columnDefinition, index) => {
+    // TODO なぜか実行時のクエリの先頭に不要なandがついてしまう
+    let andMaybe = "";
+    if (index > 0) {
+      andMaybe = " and ";
+    }
+
+    return `    if (args.${columnDefinition.column_name}) condition = condition + \`${andMaybe}\${${lowerCaseTableName}Table}.${columnDefinition.column_name} = \${SqlString.escape(args.${columnDefinition.column_name})}\`;\n`
+  }).join("") +
+      "    return condition;\n";
 };
 
 export const parseToColumnDefinitionPart = (columnDefinitions: ColumnDefinition[]): string => {

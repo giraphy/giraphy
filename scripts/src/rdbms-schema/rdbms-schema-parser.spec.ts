@@ -69,9 +69,11 @@ describe("parseRdbmsDdlToSchema ", () => {
       '    body: { type: GraphQLString },\n' +
       '      },\n' +
       '      where: (commentsTable, args, context) => {\n' +
-      '    if (args.comment_id) return `${commentsTable}.comment_id = ${SqlString.escape(args.comment_id)}`;\n' +
-      '    if (args.user_id) return `${commentsTable}.user_id = ${SqlString.escape(args.user_id)}`;\n' +
-      '    if (args.body) return `${commentsTable}.body = ${SqlString.escape(args.body)}`;\n' +
+      '    let condition = "";\n' +
+      '    if (args.comment_id) condition = condition + `${commentsTable}.comment_id = ${SqlString.escape(args.comment_id)}`;\n' +
+      '    if (args.user_id) condition = condition + ` and ${commentsTable}.user_id = ${SqlString.escape(args.user_id)}`;\n' +
+      '    if (args.body) condition = condition + ` and ${commentsTable}.body = ${SqlString.escape(args.body)}`;\n' +
+      '    return condition;\n' +
       '      },\n' +
       '    },\n' +
       '  }),\n' +
@@ -87,8 +89,10 @@ describe("parseRdbmsDdlToSchema ", () => {
       '    email: { type: GraphQLString },\n'+
       '  },\n' +
       '  where: (usersTable, args, context) => {\n' +
-      '    if (args.user_id) return `${usersTable}.user_id = ${SqlString.escape(args.user_id)}`;\n' +
-      '    if (args.email) return `${usersTable}.email = ${SqlString.escape(args.email)}`;\n' +
+      '    let condition = "";\n' +
+      '    if (args.user_id) condition = condition + `${usersTable}.user_id = ${SqlString.escape(args.user_id)}`;\n' +
+      '    if (args.email) condition = condition + ` and ${usersTable}.email = ${SqlString.escape(args.email)}`;\n' +
+      '    return condition;\n' +
       '  },\n' +
       '};\n'
     );
