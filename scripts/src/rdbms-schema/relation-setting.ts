@@ -1,4 +1,4 @@
-import { RelationType } from './rdbms-schema-parser';
+import { RelationType } from './relation-definition';
 
 export type RelationSetting = Record<string, Record<string,
   {
@@ -7,3 +7,4 @@ export type RelationSetting = Record<string, Record<string,
     to: string
   }
   > | undefined>
+

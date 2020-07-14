@@ -92,7 +92,6 @@ export const authorize = (
       const operation = definition as OperationDefinitionNode;
       operation.selectionSet.selections.forEach((selection: SelectionNode) => {
         const argumentData = getArgumentData(selection, {});
-        console.log(argumentData);
         _authorize(
           selection,
           argumentData,
