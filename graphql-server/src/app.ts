@@ -36,10 +36,6 @@ class App {
     router.post("/graphql", authenticate(authSettingMaybe), (req, res) => {
       const document = parse(new Source(req.body["query"]));
       const context = (req as any)["user"] ? (req as any)["user"] : {};
-      console.log("context", context);
-      console.log("data", )
-
-
 
       try {
         if (permissionPolicy) {
