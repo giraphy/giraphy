@@ -27,7 +27,7 @@ export const tableSchemaToGraphQLSchema = (tableName: string, allColumnDefinitio
   const columnDefinitionPart = parseToColumnDefinitionPart(targetColumnDefinitions);
   const argsPart = parseToArgsPart(targetColumnDefinitions);
   const wherePart = parseToWherePart(targetColumnDefinitions, lowerCaseTableName);
-  const relationDefinitionPart = parseToRelationPart(relationDefinitions);
+  const relationDefinitionPart = parseToRelationPart(relationDefinitions, allColumnDefinitions);
 
   const tableType = `const ${toFirstCharacterUpperCase(lowerCaseTableName)} = new GraphQLObjectType({\n` +
     `  name: "${toFirstCharacterUpperCase(lowerCaseTableName)}",\n` +
@@ -67,6 +67,7 @@ const importStatementPart = 'const {\n' +
   'const __importDefault = (this && this.__importDefault) || function (mod) {\n' +
   '  return (mod && mod.__esModule) ? mod : { "default": mod };\n' +
   '};\n' +
+  'const SqlString = require("sqlstring");\n' +
   'const joinMonster = __importDefault(require("join-monster"));\n\n';
 
 const dbCallPart = (dbSetting: DBSetting) => {

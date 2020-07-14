@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import { ColumnDefinition, parseRdbmsSchemaToGraphQLSchema } from './rdbms-schema-parser';
+import { parseRdbmsSchemaToGraphQLSchema } from './rdbms-schema-parser';
 import { DBSetting } from './db-setting';
 import { createKnex } from './knex-client';
 import { RelationSetting } from './relation-setting';
+import { ColumnDefinition } from './column-definition';
 
 const giraphySetting = yaml.safeLoad((fs.readFileSync('./giraphy.yaml', 'utf8'))) as (any | undefined);
 if (!giraphySetting) {

@@ -1,3 +1,5 @@
+import { ColumnDefinition, parseToArgsPart, parseToWherePart } from './column-definition';
+
 export type RelationType = 'hasOne' | 'hasMany';
 
 export type RelationDefinition = {
@@ -18,7 +20,7 @@ const parseRelationTypeToGraphQLType = (relationType: RelationType, targetType: 
 
 const toFirstCharacterUpperCase = (character: string): string => character.charAt(0).toUpperCase() + character.slice(1);
 
-export const parseToRelationPart = (relationDefinitions: RelationDefinition[]): string => {
+export const parseToRelationPart = (relationDefinitions: RelationDefinition[], columnDefinitions: ColumnDefinition[]): string => {
   return relationDefinitions.map(relationDefinition => {
     const from = splitTableAndColumn(relationDefinition.from);
     const to = splitTableAndColumn(relationDefinition.to);
@@ -27,6 +29,12 @@ export const parseToRelationPart = (relationDefinitions: RelationDefinition[]): 
       `      type: ${parseRelationTypeToGraphQLType(relationDefinition.type, toFirstCharacterUpperCase(to.table))},\n` +
       `      sqlJoin: (${from.table}Table, ${to.table}Table) =>\n` +
       `        \`\$\{${from.table}Table\}.${from.column} = \$\{${to.table}Table\}.${to.column}\`,\n` +
+      `      args: {\n` +
+      parseToArgsPart(columnDefinitions.filter(c => c.table_name === to.table)) +
+      `      },\n` +
+      `      where: (${to.table}Table, args, context) => {\n` +
+      parseToWherePart(columnDefinitions.filter(c => c.table_name === to.table), to.table) +
+      `      },\n` +
       `    },`
   }).join("\n") + "\n";
 };

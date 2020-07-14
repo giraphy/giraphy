@@ -29,7 +29,7 @@ export const parseToArgsPart = (columnDefinitions: ColumnDefinition[]): string =
 
 export const parseToWherePart = (columnDefinitions: ColumnDefinition[], lowerCaseTableName: string): string => {
   return columnDefinitions.map(columnDefinition =>
-    `    if (args.${columnDefinition.column_name}) return \`\${${lowerCaseTableName}Table}.${columnDefinition.column_name} = \${args.${columnDefinition.column_name}}\`;\n`
+    `    if (args.${columnDefinition.column_name}) return \`\${${lowerCaseTableName}Table}.${columnDefinition.column_name} = \${SqlString.escape(args.${columnDefinition.column_name})}\`;\n`
   ).join("");
 };
 
