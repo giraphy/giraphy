@@ -69,9 +69,21 @@ describe("parseRdbmsDdlToSchema ", () => {
       '    body: { type: GraphQLString },\n' +
       '      },\n' +
       '      where: (commentsTable, args, context) => {\n' +
-      '    if (args.comment_id) return `${commentsTable}.comment_id = ${SqlString.escape(args.comment_id)}`;\n' +
-      '    if (args.user_id) return `${commentsTable}.user_id = ${SqlString.escape(args.user_id)}`;\n' +
-      '    if (args.body) return `${commentsTable}.body = ${SqlString.escape(args.body)}`;\n' +
+      '    let condition = "";\n' +
+      '    let andMaybe = "";\n' +
+      '    if (args.comment_id) {\n' +
+      '      condition = condition + andMaybe + `${commentsTable}.comment_id = ${SqlString.escape(args.comment_id)}`;\n' +
+      '      andMaybe = " and ";\n' +
+      '    }\n' +
+      '    if (args.user_id) {\n' +
+      '      condition = condition + andMaybe + `${commentsTable}.user_id = ${SqlString.escape(args.user_id)}`;\n' +
+      '      andMaybe = " and ";\n' +
+      '    }\n' +
+      '    if (args.body) {\n' +
+      '      condition = condition + andMaybe + `${commentsTable}.body = ${SqlString.escape(args.body)}`;\n' +
+      '      andMaybe = " and ";\n' +
+      '    }\n' +
+      '    return condition;\n' +
       '      },\n' +
       '    },\n' +
       '  }),\n' +
@@ -87,8 +99,17 @@ describe("parseRdbmsDdlToSchema ", () => {
       '    email: { type: GraphQLString },\n'+
       '  },\n' +
       '  where: (usersTable, args, context) => {\n' +
-      '    if (args.user_id) return `${usersTable}.user_id = ${SqlString.escape(args.user_id)}`;\n' +
-      '    if (args.email) return `${usersTable}.email = ${SqlString.escape(args.email)}`;\n' +
+      '    let condition = "";\n' +
+      '    let andMaybe = "";\n' +
+      '    if (args.user_id) {\n' +
+      '      condition = condition + andMaybe + `${usersTable}.user_id = ${SqlString.escape(args.user_id)}`;\n' +
+      '      andMaybe = " and ";\n' +
+      '    }\n' +
+      '    if (args.email) {\n' +
+      '      condition = condition + andMaybe + `${usersTable}.email = ${SqlString.escape(args.email)}`;\n' +
+      '      andMaybe = " and ";\n' +
+      '    }\n' +
+      '    return condition;\n' +
       '  },\n' +
       '};\n'
     );
