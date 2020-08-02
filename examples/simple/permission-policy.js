@@ -1,1 +1,0 @@
-exports.permissionPolicy = undefined;

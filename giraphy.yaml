@@ -1,0 +1,42 @@
+database:
+  type: MySQL
+  version: 5.7
+  host: 127.0.0.1
+  port: 3308
+  user: root
+  password: root
+  database: example
+
+#auth:
+#  type: jwt
+#  issuer: https://yuito-work.auth0.com/
+#  algorithms: [ RS256 ]
+#  secret:
+#    jwksUri: https://yuito-work.auth0.com/.well-known/jwks.json
+#
+#
+#users:
+#  $conditions:
+#    - [ data.user_id, toBe, context.userId ]
+#  comments:
+#    $conditions:
+#      - [ ]
+#      - []
+#    $relation:
+#      type: hasMany
+#      from: users.user_id
+#      to: comments.user_id
+#
+#
+#relation:
+#  users:
+#    comments:
+#      type: hasMany
+#      from: users.user_id
+#      to: comments.user_id
+#
+#  comments:
+#    user:
+#      type: hasOne
+#      from: comments.user_id
+#      to: users.user_id

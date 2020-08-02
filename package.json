@@ -1,5 +1,5 @@
 {
-  "name": "giraphy",
+  "name": "@giraphy/giraphy",
   "version": "0.1.0",
   "description": "No Code & Secure GraphQL Server for RDBMS",
   "main": "index.js",
@@ -11,8 +11,9 @@
     "test-watch": "jest --watch"
   },
   "keywords": [],
-  "author": "",
-  "license": "MIT",
+  "author": "giraphy",
+  "organization": "giraphy",
+  "license": "ISC",
   "devDependencies": {
     "@types/express": "^4.17.6",
     "@types/express-graphql": "0.8.0",
