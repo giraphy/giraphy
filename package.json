@@ -1,6 +1,6 @@
 {
   "name": "@giraphy/giraphy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "No Code & Secure GraphQL Server for RDBMS",
   "main": "index.js",
   "scripts": {
