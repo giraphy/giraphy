@@ -1,6 +1,6 @@
 {
   "name": "@giraphy/giraphy",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "No Code & Secure GraphQL Server for RDBMS",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/body-parser": "^1.19.0",
     "@types/express": "^4.17.6",
+    "@types/express-graphql": "0.0.37",
     "@types/express-jwt": "0.0.42",
     "@types/graphql": "^0.13.0",
     "@types/jest": "^25.2.3",
@@ -41,8 +42,6 @@
     "express": "^4.17.1",
     "express-graphql": "0.8.0",
     "express-jwt": "^6.0.0",
-    "express-jwt-authz": "^2.3.1",
-    "graphql-relay": "^0.6.0",
     "join-monster": "2.1.2",
     "js-yaml": "^3.14.0",
     "jwks-rsa": "^1.8.0",
