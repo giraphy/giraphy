@@ -3,7 +3,6 @@ src/
 .gitignore
 .nodemon.json
 eslint.json
-giraphy.yaml
 jest.config.js
 README.md
 tsconfig.json
