@@ -1,5 +1,4 @@
 import express from "express";
-import graphqlHTTP from "express-graphql";
 
 import bodyParser from "body-parser";
 import { authenticate } from "./authenticator/authenticator";
@@ -7,6 +6,7 @@ import fs from "fs";
 import * as yaml from 'js-yaml';
 import { AuthSetting } from './authenticator/setting';
 import { RdbmsDBSetting } from './schema/rdbms/rdbms-schema';
+import { graphqlHTTP } from 'express-graphql';
 import { GraphQLSchema } from 'graphql';
 
 const initRouter = (schema: GraphQLSchema): express.Router => {
