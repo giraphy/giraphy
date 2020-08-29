@@ -1,6 +1,6 @@
 {
   "name": "@giraphy/giraphy",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "No Code & Secure GraphQL Server for RDBMS",
   "main": "index.js",
   "scripts": {
@@ -39,7 +39,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "express-graphql": "0.11.0",
+    "express-graphql": "0.8.0",
     "express-jwt": "^6.0.0",
     "express-jwt-authz": "^2.3.1",
     "graphql-relay": "^0.6.0",
@@ -48,6 +48,11 @@
     "jwks-rsa": "^1.8.0",
     "knex": "^0.21.1",
     "lodash": "^4.17.19"
+  },
+  "resolutions": {
+    "lodash": "4.17.20",
+    "yargs-parser": "18.1.2",
+    "mem": "4.0.0"
   },
   "repository": {
     "type": "git",
