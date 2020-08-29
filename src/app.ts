@@ -6,8 +6,8 @@ import fs from "fs";
 import * as yaml from 'js-yaml';
 import { AuthSetting } from './authenticator/setting';
 import { RdbmsDBSetting } from './schema/rdbms/rdbms-schema';
-import { GraphQLSchema } from 'graphql';
 import { graphqlHTTP } from 'express-graphql';
+import { GraphQLSchema } from 'graphql';
 
 const initRouter = (schema: GraphQLSchema): express.Router => {
   const giraphySetting = yaml.safeLoad((fs.readFileSync('./giraphy.yaml', 'utf8'))) as (any | undefined);

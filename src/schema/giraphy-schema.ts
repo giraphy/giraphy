@@ -34,7 +34,7 @@ export class GiraphyObjectType<TSource, TContext, TArgs = { [key: string]: any }
         const resolve = currentFields[key].resolve;
         newFields[key] = {
           ...currentFields[key],
-          resolve: (source, args, context, info) => {}
+          resolve: (source: any, args: any, context: any, info: any) => {}
         };
         newFields[key].resolve = ((source: TSource, args: TArgs, context: TContext, info: GraphQLResolveInfo) => {
           if (extensionParam[key] && extensionParam[key].permission && !extensionParam[key].permission(source, context, args)) {
