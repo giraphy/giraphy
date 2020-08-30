@@ -1,6 +1,7 @@
 import { GraphQLFieldConfig, GraphQLInt, GraphQLList, GraphQLSchema, GraphQLString } from 'graphql';
 import { GiraphyObjectType } from '../schema/giraphy-schema';
 import { executeQuery } from '../schema/rdbms/rdbms-schema';
+import { escapeSqlString } from '../schema/rdbms/rdbms-util';
 
 export const comments: GiraphyObjectType<any, any, any> = new GiraphyObjectType({
   name: "Comments",

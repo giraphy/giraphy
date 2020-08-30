@@ -41,7 +41,7 @@ export class GiraphyObjectType<TSource, TContext, TArgs = { [key: string]: any }
             throw new GraphQLError("Forbiden Error");
           }
           if (resolve) {
-            resolve(source, args, context, info);
+            return resolve(source, args, context, info);
           }
         }) as GraphQLFieldResolver<TSource, TContext, Record<string, any>>
       }
