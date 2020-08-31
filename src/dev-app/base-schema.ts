@@ -1,7 +1,8 @@
-import { GraphQLFieldConfig, GraphQLInt, GraphQLList, GraphQLSchema, GraphQLString } from 'graphql';
-import { GiraphyObjectType } from '../schema/giraphy-schema';
+import { GraphQLFieldConfig, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
+import { GiraphyObjectType, RichGraphqlObjectType } from '../schema/giraphy-schema';
 import { executeQuery } from '../schema/rdbms/rdbms-schema';
 import { escapeSqlString } from '../schema/rdbms/rdbms-util';
+import { GraphQLObjectTypeConfig } from 'graphql/type/definition';
 
 export const comments: GiraphyObjectType<any, any, any> = new GiraphyObjectType({
   name: "Comments",
@@ -104,3 +105,13 @@ export const usersRootQuery: GraphQLFieldConfig<any, any> = {
       .join(" and ");
   },
 };
+
+
+new RichGraphqlObjectType(users.objectTypeConfig)
+  .update({
+    comments: {
+      permission: (source, context, args) => true
+    }
+  })
+
+

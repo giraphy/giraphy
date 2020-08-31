@@ -12,6 +12,47 @@ type ObjectTypeExtension<TSource, TContext, TArgs = { [key: string]: any }> = Re
   }
 >
 
+export class RichGraphqlObjectType<TSource, TContext, TArgs = { [key: string]: any }>
+  extends GraphQLObjectType
+{
+  constructor(private config: GraphQLObjectTypeConfig<any, any>) {
+    super(config);
+  }
+
+  toConfig(): GraphQLObjectTypeConfig<any, any> {
+    return this.config;
+  }
+
+  // TODO ここでリレーションも自分で定義できるようにする
+  update(extensionParam: ObjectTypeExtension<TSource, TContext, TArgs>): RichGraphqlObjectType<TSource, TContext, TArgs> {
+    const currentFields: GraphQLFieldConfigMap<TSource, TContext> = (this.config.fields as () => GraphQLFieldConfigMap<TSource, TContext>)();
+    let newFields: GraphQLFieldConfigMap<TSource, TContext> = {};
+
+    Object.keys(extensionParam).forEach(key => {
+      if (this.getFields()[key]) {
+        const resolve = currentFields[key].resolve;
+        newFields[key] = {
+          ...currentFields[key],
+          resolve: (source: any, args: any, context: any, info: any) => {}
+        };
+        newFields[key].resolve = ((source: TSource, args: TArgs, context: TContext, info: GraphQLResolveInfo) => {
+          if (extensionParam[key] && extensionParam[key].permission && !extensionParam[key].permission(source, context, args)) {
+            throw new GraphQLError("Forbiden Error");
+          }
+          if (resolve) {
+            return resolve(source, args, context, info);
+          }
+        }) as GraphQLFieldResolver<TSource, TContext, Record<string, any>>
+      }
+    });
+
+    return new RichGraphqlObjectType({
+      ...this.config,
+      fields: newFields
+    })
+  }
+}
+
 export class GiraphyObjectType<TSource, TContext, TArgs = { [key: string]: any }> {
   objectType: GraphQLObjectType;
   objectTypeConfig: GraphQLObjectTypeConfig<TSource, TContext>;
