@@ -1,8 +1,26 @@
-import { GraphQLFieldConfig, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
-import { GiraphyObjectType, RichGraphqlObjectType } from '../schema/giraphy-schema';
+import {
+  GraphQLFieldConfig,
+  GraphQLInt,
+  GraphQLList,
+  GraphQLObjectType,
+  GraphQLResolveInfo,
+  GraphQLSchema,
+  GraphQLString
+} from 'graphql';
+import {
+  createRootQuery,
+  GiraphyObjectType,
+  RelationQuery,
+  RelationType,
+  RichGraphqlObjectRootType,
+  RichGraphqlObjectType, RootQuery
+} from '../schema/giraphy-schema';
 import { executeQuery } from '../schema/rdbms/rdbms-schema';
 import { escapeSqlString } from '../schema/rdbms/rdbms-util';
 import { GraphQLObjectTypeConfig } from 'graphql/type/definition';
+import { rootQueryObject } from './index';
+
+
 
 export const comments: GiraphyObjectType<any, any, any> = new GiraphyObjectType({
   name: "Comments",
@@ -40,7 +58,7 @@ export const comments: GiraphyObjectType<any, any, any> = new GiraphyObjectType(
 });
 
 export const commentsRootQuery: GraphQLFieldConfig<any, any> = {
-  type: new GraphQLList(comments.objectType),
+  type: (new GraphQLList(comments.objectType)).ofType,
   resolve: (source, args, context, info) => {
     return executeQuery(info, context)
   },
@@ -106,12 +124,69 @@ export const usersRootQuery: GraphQLFieldConfig<any, any> = {
   },
 };
 
+const commentBaseType = new RichGraphqlObjectType(comments.objectTypeConfig)
+const usersBaseType = new RichGraphqlObjectType(users.objectTypeConfig)
+const usersToCommentsListRelation: RelationType = {
+    from: "user_id",
+    to: "user_id"
+};
 
-new RichGraphqlObjectType(users.objectTypeConfig)
+const commentsRelationQuery = <TSource, TContext, TArgs>(objectType: RichGraphqlObjectType<TSource, TContext, TArgs>, relation: {type: string, from: string, to: string }): RelationQuery<TSource, TContext, TArgs> =>
+  new RelationQuery({
+    type: new GraphQLList(comments.objectType),
+    sqlJoin: (usersTable: string, commentsTable: string) =>
+      `${usersTable}.user_id = ${commentsTable}.user_id`,
+    args: {
+      commentId: { type: GraphQLString },
+      userId: { type: GraphQLString },
+      text: { type: GraphQLString },
+    },
+    where: (table: string, args: any, context: any) => {
+      // @ts-ignore
+      return Object.keys(args).map(key => `${table}.${comments.fieldConfig[key].sqlColumn} = ${escapeSqlString(args[key])}`)
+        .join(" and ");
+    },
+  });
+
+const usersType = usersBaseType
   .update({
+    fullName: {
+      permission: (source, context, args) => true,
+    },
     comments: {
-      permission: (source, context, args) => true
+      relation: commentsRelationQuery(commentBaseType, {
+        type: "hasMany",
+        from: "user_id",
+        to: "user_id",
+      }),
+      permission: (source, context, args) => true,
     }
-  })
+  });
 
+const usersRootQuery2 = <TSource, TContext, TArgs>(objectType: RichGraphqlObjectType<TSource, TContext, TArgs>): RootQuery<TSource, TContext, TArgs> => new RootQuery({
+  type: new GraphQLList(objectType),
+  resolve: (source: TSource, args: TArgs, context: TContext, info: GraphQLResolveInfo) => {
+    return executeQuery(info, context)
+  },
+  args: {
+    userId: { type: GraphQLString },
+    email: { type: GraphQLString },
+  },
+  // @ts-ignore
+  where: (table: string, args: any, context: any) => {
+    // @ts-ignore
+    return Object.keys(args).map(key => `${table}.${users.fieldConfig[key].sqlColumn} = ${escapeSqlString(args[key])}`)
+      .join(" and ");
+  },
+});
 
+const rootQuery = createRootQuery({
+  users: {
+    root: usersRootQuery2(usersType),
+    permission: (source, context, args) => true
+  }
+})
+
+const schema = new GraphQLSchema({
+  query: rootQuery
+});
