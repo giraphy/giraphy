@@ -3,56 +3,51 @@ import {
   GraphQLFieldConfigMap,
   GraphQLFieldResolver,
   GraphQLObjectType,
-  GraphQLObjectTypeConfig, GraphQLResolveInfo,
+  GraphQLObjectTypeConfig,
+  GraphQLResolveInfo,
 } from 'graphql';
+import { GraphQLFieldConfig } from 'graphql/type/definition';
 
-type ObjectTypeExtension<TSource, TContext, TArgs = { [key: string]: any }> = Record<
-  string, {
-    permission: (source: TSource, context: TContext, args: TArgs) => boolean
-  }
->
+export type RelationType = {
+  type: string,
+  from: string,
+  to: string
+}
 
-export class GiraphyObjectType<TSource, TContext, TArgs = { [key: string]: any }> {
-  objectType: GraphQLObjectType;
-  objectTypeConfig: GraphQLObjectTypeConfig<TSource, TContext>;
 
-  constructor(config: GraphQLObjectTypeConfig<TSource, TContext>) {
-    this.objectType = new GraphQLObjectType((config));
-    this.objectTypeConfig = config;
-  }
+export class RelationQuery<TSource, TContext, TArgs> {
+  constructor(public config: GraphQLFieldConfig<TSource, TContext, TArgs>) {}
+}
 
-  get fieldConfig(): GraphQLFieldConfigMap<TSource, TContext> {
-    return (this.objectTypeConfig.fields as () => GraphQLFieldConfigMap<TSource, TContext>)();
-  }
+export class RootQuery<TSource, TContext, TArgs> {
+  constructor(public config: GraphQLFieldConfig<TSource, TContext, TArgs>) {}
+}
 
-  extend(extensionParam: ObjectTypeExtension<TSource, TContext, TArgs>) {
-    const currentFields: GraphQLFieldConfigMap<TSource, TContext> = (this.objectTypeConfig.fields as () => GraphQLFieldConfigMap<TSource, TContext>)();
-    let newFields: GraphQLFieldConfigMap<TSource, TContext> = {};
+export const createRootQuery = <TSource, TContext, TArgs>(
+  param: Record<string, {
+    root: RootQuery<any, any, any>,
+    permission: ((source: any, context: any, args: any) => boolean) | undefined,
+  }>
+): GraphQLObjectType => {
+  return new GraphQLObjectType({
+    name: "Query",
+    fields: () => {
+      let fields: GraphQLFieldConfigMap<any, any> = {};
+      Object.keys(param).map(key => {
+        const rootConfig = param[key]!
 
-    Object.keys(extensionParam).forEach(key => {
-      if (this.objectType.getFields()[key]) {
-        const resolve = currentFields[key].resolve;
-        newFields[key] = {
-          ...currentFields[key],
-          resolve: (source: any, args: any, context: any, info: any) => {}
-        };
-        newFields[key].resolve = ((source: TSource, args: TArgs, context: TContext, info: GraphQLResolveInfo) => {
-          if (extensionParam[key] && extensionParam[key].permission && !extensionParam[key].permission(source, context, args)) {
+        fields[key] = rootConfig.root.config;
+        const resolve = fields[key].resolve
+        fields[key].resolve = ((source: TSource, args: TArgs, context: TContext, info: GraphQLResolveInfo) => {
+          if (param[key] && param[key].permission && !param[key].permission!(source, context, args)) {
             throw new GraphQLError("Forbiden Error");
           }
           if (resolve) {
             return resolve(source, args, context, info);
           }
         }) as GraphQLFieldResolver<TSource, TContext, Record<string, any>>
-      }
-    });
-
-    this.objectType = new GraphQLObjectType({
-      ...this.objectTypeConfig,
-      fields: () => ({
-        ...(this.objectTypeConfig.fields as () => GraphQLFieldConfigMap<TSource, TContext>)(),
-        ...newFields
       })
-    })
-  }
+      return fields
+    }
+  })
 }
