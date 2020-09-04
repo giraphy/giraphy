@@ -1,17 +1,31 @@
-import { usersRootQuery } from './base-schema';
+import { commentsBaseType, commentsRelationQuery, usersBaseType, usersRootQuery } from './base-schema';
 import { GraphQLSchema } from 'graphql';
-import { GiraphyObjectType } from '../schema/giraphy-schema';
+import { createRootQuery, } from '../schema/giraphy-schema';
 import { initGiraphyApp } from '../app';
 
-export let rootQueryObject = new GiraphyObjectType({
-  name: "Query",
-  fields: () => ({
-    users: usersRootQuery,
-  }),
+const rootQuery = createRootQuery({
+  users: {
+    root: usersRootQuery(usersBaseType.extend({
+      email: {
+        permission: (source, context, args) => false
+      },
+      // TODO リレーションのアプデ
+      comments: {
+        relation: commentsRelationQuery(commentsBaseType.extend({
+          commentId: {
+            permission: (source, context, args) => true
+          }
+        }),
+        { type: "hasMany", from: "user_id", to: "user_id" }
+        )
+      }
+    })),
+    permission: (source, context, args) => true
+  }
 });
 
 const schema = new GraphQLSchema({
-  query: rootQueryObject.objectType,
+  query: rootQuery
 });
 
 initGiraphyApp(schema);

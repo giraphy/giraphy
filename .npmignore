@@ -1,5 +1,6 @@
 src/
 .idea/
+db
 .gitignore
 .nodemon.json
 eslint.json
