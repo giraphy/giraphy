@@ -7,7 +7,7 @@ import {
   GraphQLResolveInfo
 } from 'graphql';
 import { GraphQLFieldConfig } from 'graphql/type/definition';
-import { RelationQuery } from './relation-query';
+import { RelationQuery, TypeRootQuery } from './rdbms/rdbms-query';
 
 type ObjectTypeExtension<TSource, TContext, TArgs = { [key: string]: any }> = Record<
   string, Partial<{
@@ -88,3 +88,21 @@ export class QueryObjectType<TSource, TContext> {
   }
 
 }
+
+export const createRootQuery = (
+  params: Record<string, {
+    root: TypeRootQuery<any, any, any>,
+    permission: ((source: any, context: any, args: any) => boolean) | undefined,
+  }>
+): GraphQLObjectType => {
+  let fields: GraphQLFieldConfigMap<any, any> = {};
+  Object.keys(params).forEach(key => {
+    const param = params[key]!;
+    fields[key] = param.root.config;
+  });
+
+  return new QueryObjectType({
+      name: "Query",
+      fields: () => fields
+  }).extend("Query", params).objectType
+};

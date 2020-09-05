@@ -1,7 +1,7 @@
 import { QueryObjectType } from './query-object-type';
 import { GraphQLResolveInfo, GraphQLString } from 'graphql';
-import { RelationQuery } from './relation-query';
 import { GraphQLFieldConfigMap } from 'graphql/type/definition';
+import { RelationQuery } from './rdbms/rdbms-query';
 
 describe("QueryObjectType", () => {
   const queryObjectType = new QueryObjectType<undefined, {id: string}>({

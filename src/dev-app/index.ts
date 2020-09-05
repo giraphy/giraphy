@@ -1,12 +1,12 @@
-import { commentsBaseType, usersBaseType, usersRootQuery } from './base-schema';
+import { commentsBaseType, usersBaseType } from './base-schema';
 import { GraphQLSchema } from 'graphql';
-import { createRootQuery, } from '../schema/giraphy-schema';
 import { initGiraphyApp } from '../app';
-import { RelationQuery } from '../schema/relation-query';
+import { RelationQuery, TypeRootQuery } from '../schema/rdbms/rdbms-query';
+import { createRootQuery } from '../schema/query-object-type';
 
 const rootQuery = createRootQuery({
   users: {
-    root: usersRootQuery(usersBaseType.extend("Users", {
+    root: new TypeRootQuery(usersBaseType.extend("Users", {
       email: {
         permission: (source, context, args) => false
       },
