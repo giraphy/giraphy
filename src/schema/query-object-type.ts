@@ -6,14 +6,12 @@ import {
   GraphQLObjectTypeConfig,
   GraphQLResolveInfo
 } from 'graphql';
-import { GraphQLFieldConfig } from 'graphql/type/definition';
 import { RelationQuery, TypeRootQuery } from './rdbms/rdbms-query';
 
 type ObjectTypeExtension<TSource, TContext, TArgs = { [key: string]: any }> = Record<
   string, Partial<{
   permission: (source: TSource, context: TContext, args: TArgs) => boolean,
-  relation: RelationQuery<any, any, any>,
-  custom: GraphQLFieldConfig<TSource, TContext, TArgs>
+  relation: RelationQuery<any, any, any>
 }>
 >
 
