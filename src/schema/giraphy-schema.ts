@@ -3,21 +3,9 @@ import {
   GraphQLFieldConfigMap,
   GraphQLFieldResolver,
   GraphQLObjectType,
-  GraphQLObjectTypeConfig,
   GraphQLResolveInfo,
 } from 'graphql';
 import { GraphQLFieldConfig } from 'graphql/type/definition';
-
-export type RelationType = {
-  type: string,
-  from: string,
-  to: string
-}
-
-
-export class RelationQuery<TSource, TContext, TArgs> {
-  constructor(public config: GraphQLFieldConfig<TSource, TContext, TArgs>) {}
-}
 
 export class RootQuery<TSource, TContext, TArgs> {
   constructor(public config: GraphQLFieldConfig<TSource, TContext, TArgs>) {}

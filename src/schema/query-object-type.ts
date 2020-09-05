@@ -7,7 +7,7 @@ import {
   GraphQLResolveInfo
 } from 'graphql';
 import { GraphQLFieldConfig } from 'graphql/type/definition';
-import { RelationQuery } from './giraphy-schema';
+import { RelationQuery } from './relation-query';
 
 type ObjectTypeExtension<TSource, TContext, TArgs = { [key: string]: any }> = Record<
   string, Partial<{
@@ -28,7 +28,21 @@ export class QueryObjectType<TSource, TContext> {
     return (this.objectType as any)["_typeConfig"] as GraphQLObjectTypeConfig<TSource, TContext>
   }
 
-  extend<TArgs>(extensionParam: ObjectTypeExtension<TSource, TContext>): QueryObjectType<TSource, TContext> {
+  extend<TArgs>(name: string, extensionParam: ObjectTypeExtension<TSource, TContext>): QueryObjectType<TSource, TContext> {
+    return this
+      .extendName(name)
+      .extendFieldWithPermission(extensionParam)
+      .extendFieldWithRelation(extensionParam)
+  }
+
+  private extendName(name: string): QueryObjectType<TSource, TContext> {
+    return new QueryObjectType({
+      ...this.toConfig(),
+      name: name
+    });
+  }
+
+  private extendFieldWithPermission<TArgs>(extensionParam: ObjectTypeExtension<TSource, TContext>): QueryObjectType<TSource, TContext> {
     let currentFields: GraphQLFieldConfigMap<TSource, TContext> = (this.toConfig().fields as () => GraphQLFieldConfigMap<TSource, TContext>)();
 
     Object.keys(extensionParam).forEach(key => {
@@ -51,7 +65,26 @@ export class QueryObjectType<TSource, TContext> {
 
     return new QueryObjectType({
       ...this.toConfig(),
-      fields: currentFields
+      fields: () => currentFields
     });
   }
+
+  private extendFieldWithRelation<TArgs>(extensionParams: ObjectTypeExtension<TSource, TContext>): QueryObjectType<TSource, TContext> {
+    let fields: GraphQLFieldConfigMap<TSource, TContext> = (this.toConfig().fields as () => GraphQLFieldConfigMap<TSource, TContext>)();
+
+    Object.keys(extensionParams).forEach(key => {
+      const extensionParam = extensionParams[key];
+
+      if (extensionParams && extensionParam.relation) {
+        const relation = extensionParam.relation;
+        fields[key] = relation.config
+      }
+    });
+
+    return new QueryObjectType({
+      ...this.toConfig(),
+      fields: () => fields
+    })
+  }
+
 }

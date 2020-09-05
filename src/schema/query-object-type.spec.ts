@@ -1,21 +1,54 @@
 import { QueryObjectType } from './query-object-type';
 import { GraphQLResolveInfo, GraphQLString } from 'graphql';
+import { RelationQuery } from './relation-query';
+import { GraphQLFieldConfigMap } from 'graphql/type/definition';
 
 describe("QueryObjectType", () => {
-  describe("extend", () => {
-    const queryObjectType = new QueryObjectType<undefined, {id: string}>({
-      name: "Test",
-      fields: () => ({
-        id: {
-          type: GraphQLString,
-          resolve: ((source, args, context) => 1)
-        }
+  const queryObjectType = new QueryObjectType<undefined, {id: string}>({
+    name: "Test",
+    fields: () => ({
+      id: {
+        type: GraphQLString,
+        resolve: ((source, args, context) => 1)
+      }
+    })
+  });
+
+  const childQueryObjectType = new QueryObjectType<undefined, {childId: string, parentId: string}>({
+    name: "Child",
+    fields: () => ({
+      childId: {
+        type: GraphQLString,
+        resolve: ((source, args, context) => 2)
+      },
+      parentId: ({
+        type: GraphQLString,
+        resolve: ((source, args, context) => 1)
       })
     })
+  });
 
+  describe("extend relation", () => {
+    test("should extend fields with a relation query", () => {
+      const relationQuery = new RelationQuery(childQueryObjectType, {
+        type: "hasMany",
+        from: "id",
+        to: "parent_id"
+      });
+      expect(
+        ((queryObjectType.extend("NewType", {
+          comments: {
+            relation: relationQuery
+          }
+        }).toConfig().fields) as () => GraphQLFieldConfigMap<any, any>)().comments == relationQuery.config
+      );
+    });
+  });
+
+  describe("extend permission", () => {
     test("should extend a resolver with a permissions and throw Forbidden Error", () => {
       expect(() =>
-        queryObjectType.extend({
+        queryObjectType.extend("NewType",{
           id: {
             permission: (source, context, args) => context.id == args.id
           }
@@ -25,7 +58,7 @@ describe("QueryObjectType", () => {
 
     test("should extend a resolver with a permission and pass the permission", () => {
       expect(
-        queryObjectType.extend({
+        queryObjectType.extend("NewType",{
           id: {
             permission: (source, context, args) => context.id == args.id
           }

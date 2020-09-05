@@ -1,15 +1,11 @@
 import { GraphQLFieldConfig, GraphQLList, GraphQLResolveInfo, GraphQLString } from 'graphql';
-import {
-  RelationQuery,
-  RelationType,
-  RootQuery
-} from '../schema/giraphy-schema';
+import { RootQuery } from '../schema/giraphy-schema';
 import { executeQuery } from '../schema/rdbms/rdbms-schema';
 import { escapeSqlString } from '../schema/rdbms/rdbms-util';
 import { QueryObjectType } from '../schema/query-object-type';
 
 export const usersBaseType: QueryObjectType<any, any> = new QueryObjectType({
-  name: "Users",
+  name: "UsersBase",
   // @ts-ignore
   sqlTable: "users",
   uniqueKey: "user_id",
@@ -42,23 +38,8 @@ export const usersRootQuery = <TSource, TContext, TArgs>(objectType: QueryObject
   },
 });
 
-export const usersRelationQuery = <TSource, TContext, TArgs>(objectType: QueryObjectType<TSource, TContext>, relation: RelationType): RelationQuery<TSource, TContext, TArgs> => new RelationQuery({
-    type: objectType.objectType,
-    sqlJoin: (commentsTable: string, usersTable: string) =>
-      `${commentsTable}.user_id = ${usersTable}.user_id`,
-    args: {
-      userId: { type: GraphQLString },
-      email: { type: GraphQLString },
-    },
-    where: (table: string, args: any, context: any) => {
-      // @ts-ignore
-      return Object.keys(args).map(key => `${table}.${users.fieldConfig[key].sqlColumn} = ${escapeSqlString(args[key])}`)
-        .join(" and ");
-    },
-})
-
 export const commentsBaseType: QueryObjectType<any, any> = new QueryObjectType({
-  name: "Comments",
+  name: "CommentsBase",
   // @ts-ignore
   sqlTable: "comments",
   uniqueKey: "comment_id",
@@ -95,20 +76,3 @@ export const commentsRootQuery = <TSource, TContext, TArgs>(objectType: QueryObj
       .join(" and ");
   },
 });
-
-export const commentsRelationQuery = <TSource, TContext, TArgs>(objectType: QueryObjectType<TSource, TContext>, relation: RelationType): RelationQuery<TSource, TContext, TArgs> =>
-  new RelationQuery({
-    type: new GraphQLList(objectType.objectType),
-    sqlJoin: (fromTable: string, toTable: string) =>
-      `${fromTable}.${relation.from}} = ${toTable}${relation.to}`,
-    args: {
-      commentId: { type: GraphQLString },
-      userId: { type: GraphQLString },
-      text: { type: GraphQLString },
-    },
-    where: (table: string, args: any, context: any) => {
-      // @ts-ignore
-      return Object.keys(args).map(key => `${table}.${comments.fieldConfig[key].sqlColumn} = ${escapeSqlString(args[key])}`)
-        .join(" and ");
-    },
-  });
