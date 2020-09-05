@@ -2,10 +2,8 @@ import { QueryObjectType } from '../query-object-type';
 import {
   GraphQLFieldConfig,
   GraphQLFieldConfigArgumentMap,
-  GraphQLFieldMap,
   GraphQLList,
-  GraphQLNonNull,
-  GraphQLScalarType
+  GraphQLNonNull
 } from 'graphql/type/definition';
 import { escapeSqlString } from './rdbms-util';
 import { executeQuery } from './rdbms-schema';
@@ -15,13 +13,14 @@ export class RelationQuery<TSource, TContext, TArgs> {
 
   constructor(
     type: QueryObjectType<TSource, TContext>,
+    args: GraphQLFieldConfigArgumentMap,
     relationSetting: RelationSetting,
   ) {
     this.config = {
       type: relationSettingToGraphQLObjectType(type, relationSetting.type),
       sqlJoin: (fromTable: string, toTable: string) =>
         `${fromTable}.${relationSetting.from} = ${toTable}.${relationSetting.to}`,
-      args: rdbmsColumnFieldsToArgs(type.objectType.getFields()),
+      args: args,
       where: (table: string, args: TArgs, context: any) => {
         // @ts-ignore
         return Object.keys(args).map(key => `${table}.${type.objectType.getFields()[key].sqlColumn} = ${escapeSqlString(args[key])}`)
@@ -36,14 +35,15 @@ export class TypeRootQuery<TSource, TContext, TArgs> {
 
   constructor(
     type: QueryObjectType<TSource, TContext>,
+    args: GraphQLFieldConfigArgumentMap
   ) {
     this.config = {
       type: type.objectType,
       resolve: (source, args, context, info) => executeQuery(info, context),
-      args: rdbmsColumnFieldsToArgs(type.objectType.getFields()),
+      args: args,
       where: (table: string, args: TArgs, context: any) => {
         // @ts-ignore
-        return Object.keys(args).map(key => `${table}.${objectType.objectType.getFields()[key].sqlColumn} = ${escapeSqlString(args[key])}`)
+        return Object.keys(args).map(key => `${table}.${type.objectType.getFields()[key].sqlColumn} = ${escapeSqlString(args[key])}`)
           .join(" and ");
       },
     }
@@ -64,23 +64,4 @@ const relationSettingToGraphQLObjectType = (objectType: QueryObjectType<any, any
     case 'hasOne': return objectType.objectType
     case 'hasOptionalOne': return new GraphQLNonNull(objectType.objectType)
   }
-}
-
-const rdbmsColumnFieldsToArgs = <TSource, TContext>(fieldMap: GraphQLFieldMap<TSource, TContext>): GraphQLFieldConfigArgumentMap => {
-  let args = {} as GraphQLFieldConfigArgumentMap;
-  Object.keys(fieldMap).map(key => {
-    if ((fieldMap[key]! as any)["sqlColumn"]) {
-      const fieldType = fieldMap[key].type
-
-      if (fieldType instanceof GraphQLScalarType) {
-        args[key] = (
-          {
-            type: fieldType
-          }
-        )
-      }
-    }
-  });
-
-  return args;
 }
