@@ -30,7 +30,7 @@ describe("QueryObjectType", () => {
 
   describe("extend relation", () => {
     test("should extend fields with a relation query", () => {
-      const relationQuery = new RelationQuery(childQueryObjectType, {
+      const relationQuery = new RelationQuery(childQueryObjectType, {}, {
         type: "hasMany",
         from: "id",
         to: "parent_id"
