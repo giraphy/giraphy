@@ -1,35 +1,44 @@
-import { commentsBaseType, usersBaseType } from './base-schema';
+import { commentsBaseType, commentsQueryArgs, usersBaseType, usersQueryArgs } from './base-schema';
 import { GraphQLSchema } from 'graphql';
 import { initGiraphyApp } from '../app';
 import { RelationQuery, TypeRootQuery } from '../schema/rdbms/rdbms-query';
-import { createRootQuery } from '../schema/query-object-type';
+import { createRootQuery, QueryObjectType } from '../schema/query-object-type';
 
-const rootQuery = createRootQuery({
-  users: {
-    root: new TypeRootQuery(usersBaseType.extend("Users", {
-      email: {
-        permission: (source, context, args) => false
-      },
-      comments: {
-        relation: new RelationQuery(
-          commentsBaseType.extend("Comments", {
-            commentId: {
-              permission: (source, context, args) => true
-            },
-            user: {
-              relation: new RelationQuery(
-                usersBaseType,
-                { type: "hasOne", from: "user_id", to: "user_id" }
-              )
-            }
-          }),
-          { type: "hasMany", from: "user_id", to: "user_id" }
-        )
-      }
-    })),
+const commentsType: QueryObjectType<any, any> = commentsBaseType.extend("Comments", () => ({
+  commentId: {
     permission: (source, context, args) => true
+  },
+  user: {
+    relation: new RelationQuery(
+      usersType,
+      usersQueryArgs,
+{ type: "hasOne", from: "user_id", to: "user_id" },
+    )
   }
-});
+}));
+
+const usersType: QueryObjectType<any, any> = usersBaseType.extend("Users", () => ({
+  email: {
+    permission: (source, context, args) => true
+  },
+  comments: {
+    relation: new RelationQuery(
+      commentsType,
+      commentsQueryArgs,
+  { type: "hasMany", from: "user_id", to: "user_id" },
+    )
+  }
+}));
+
+const rootQuery = createRootQuery(() => ({
+  users: {
+    root: new TypeRootQuery(usersType, usersQueryArgs),
+    permission: (source, context, args) => true
+  },
+  comments: {
+    root: new TypeRootQuery(commentsType, commentsQueryArgs)
+  }
+}));
 
 const schema = new GraphQLSchema({
   query: rootQuery

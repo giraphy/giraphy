@@ -38,7 +38,7 @@ describe("QueryObjectType", () => {
       expect(
         ((queryObjectType.extend("NewType", {
           comments: {
-            relation: relationQuery
+            relation: () => relationQuery
           }
         }).toConfig().fields) as () => GraphQLFieldConfigMap<any, any>)().comments == relationQuery.config
       );
