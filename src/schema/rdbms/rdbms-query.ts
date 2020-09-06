@@ -3,24 +3,43 @@ import {
   GraphQLFieldConfig,
   GraphQLFieldConfigArgumentMap,
   GraphQLList,
-  GraphQLNonNull
+  GraphQLNonNull, GraphQLObjectType
 } from 'graphql/type/definition';
 import { escapeSqlString } from './rdbms-util';
 import { executeQuery } from './rdbms-schema';
+import { connectionDefinitions, forwardConnectionArgs } from 'graphql-relay'
+import { GraphQLInt } from 'graphql';
 
 export class RelationQuery<TSource, TContext, TArgs> {
   public config: GraphQLFieldConfig<TSource, TContext, TArgs>
 
   constructor(
     type: QueryObjectType<TSource, TContext>,
-    args: GraphQLFieldConfigArgumentMap,
     relationSetting: RelationSetting,
+    conf?: Partial<{
+      args: GraphQLFieldConfigArgumentMap,
+      pagination: boolean
+    }>
   ) {
+    // @ts-ignore
+    const objectType: GraphQLObjectType =
+      conf && conf.pagination ?
+        connectionDefinitions({
+          // @ts-ignore
+          nodeType: relationSettingToGraphQLObjectType(type, relationSetting.type),
+        }).connectionType :
+        relationSettingToGraphQLObjectType(type, relationSetting.type);
+
     this.config = {
-      type: relationSettingToGraphQLObjectType(type, relationSetting.type),
+      type: objectType,
       sqlJoin: (fromTable: string, toTable: string) =>
         `${fromTable}.${relationSetting.from} = ${toTable}.${relationSetting.to}`,
-      args: args,
+      args: getArgsFromQueryConfig(conf),
+      sqlPaginate: conf && conf.pagination ? conf.pagination : false,
+      sortKey: conf && conf.pagination ? {
+        key: type.toConfig().uniqueKey as string,
+        order: 'ASC'
+      } : undefined,
       where: (table: string, args: TArgs, context: any) => {
         // @ts-ignore
         return Object.keys(args).map(key => `${table}.${type.objectType.getFields()[key].sqlColumn} = ${escapeSqlString(args[key])}`)
@@ -35,15 +54,38 @@ export class TypeRootQuery<TSource, TContext, TArgs> {
 
   constructor(
     type: QueryObjectType<TSource, TContext>,
-    args: GraphQLFieldConfigArgumentMap
+    conf?: Partial<{
+      args: GraphQLFieldConfigArgumentMap,
+      pagination: boolean
+    }>,
   ) {
+    // @ts-ignore
+    const objectType: GraphQLObjectType =
+      conf && conf.pagination ?
+        connectionDefinitions({
+          // @ts-ignore
+          nodeType: type.objectType,
+        }).connectionType :
+        type.objectType;
+
     this.config = {
-      type: type.objectType,
+      type: objectType,
       resolve: (source, args, context, info) => executeQuery(info, context),
-      args: args,
+      args: getArgsFromQueryConfig(conf),
+      sqlPaginate: conf && conf.pagination ? conf.pagination : false,
+      sortKey: conf && conf.pagination ? {
+        key: type.toConfig().uniqueKey as string,
+        order: 'ASC'
+      } : undefined,
       where: (table: string, args: TArgs, context: any) => {
         // @ts-ignore
-        return Object.keys(args).map(key => `${table}.${type.objectType.getFields()[key].sqlColumn} = ${escapeSqlString(args[key])}`)
+        return Object.keys(args).map(key => {
+          if (!(type.objectType.getFields()[key]) || !((type.objectType.getFields()[key] as any)["sqlColumn"]))
+            return;
+
+          const sqlColumn = (type.objectType.getFields()[key] as any)["sqlColumn"];
+          return `${table}.${sqlColumn} = ${escapeSqlString((args as any)[key])}`
+        }).filter(statment => !!statment)
           .join(" and ");
       },
     }
@@ -64,4 +106,15 @@ const relationSettingToGraphQLObjectType = (objectType: QueryObjectType<any, any
     case 'hasOne': return objectType.objectType
     case 'hasOptionalOne': return new GraphQLNonNull(objectType.objectType)
   }
+}
+
+const getArgsFromQueryConfig = (conf?: Partial<{
+  args: GraphQLFieldConfigArgumentMap,
+  pagination: boolean
+}>): GraphQLFieldConfigArgumentMap | undefined => {
+  if (!conf) {
+    return;
+  }
+  const { args, pagination } = conf;
+  return pagination ? { ...forwardConnectionArgs, ...args } : args;
 }

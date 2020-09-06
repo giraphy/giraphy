@@ -6,7 +6,7 @@ export const usersBaseType: QueryObjectType<any, any> = new QueryObjectType({
   // @ts-ignore
   sqlTable: "users",
   uniqueKey: "user_id",
-  fields: {
+  fields: () => ({
     userId: {
       type: GraphQLString,
       sqlColumn: "user_id",
@@ -15,7 +15,7 @@ export const usersBaseType: QueryObjectType<any, any> = new QueryObjectType({
       type: GraphQLString,
       sqlColumn: "email",
     },
-  },
+  }),
 });
 
 export const usersQueryArgs = {
@@ -32,7 +32,7 @@ export const commentsBaseType: QueryObjectType<any, any> = new QueryObjectType({
   // @ts-ignore
   sqlTable: "comments",
   uniqueKey: "comment_id",
-  fields: {
+  fields: () => ({
     commentId: {
       type: GraphQLString,
       sqlColumn: "comment_id",
@@ -45,7 +45,7 @@ export const commentsBaseType: QueryObjectType<any, any> = new QueryObjectType({
       type: GraphQLString,
       sqlColumn: "text",
     },
-  },
+  }),
 });
 
 export const commentsQueryArgs = {

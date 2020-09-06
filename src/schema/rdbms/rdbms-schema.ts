@@ -17,9 +17,12 @@ export type RdbmsDBSetting = {
 
 export const executeQuery = <TSource, TContext, TArgs = { [argName: string]: any }>(resolveInfo: any, context: TContext): Promise<any> => {
   const f = (sql: string) => {
+    console.log(sql);
     return dbClient
       .raw(sql.split('"').join(""))
       .then((result: any) => (result.length > 0 ? result[0] : null))
   };
-  return joinMonster(resolveInfo, context, f)
+  return joinMonster(resolveInfo, context, f, {
+    dialect: "mysql8"
+  });
 };
