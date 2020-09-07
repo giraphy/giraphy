@@ -4,8 +4,6 @@ import { initGiraphyApp } from '../app';
 import { RelationQuery, TypeRootQuery } from '../schema/rdbms/rdbms-query';
 import { createRootQuery, QueryObjectType } from '../schema/query-object-type';
 
-import { connectionDefinitions } from 'graphql-relay'
-
 const commentsType: QueryObjectType<any, any> = commentsBaseType.extend("Comments", {
   commentId: {
     permission: (source, context, args) => true
@@ -35,9 +33,6 @@ const usersType: QueryObjectType<any, any> = usersBaseType.extend("Users", {
     )
   }
 });
-
-// @ts-ignore
-const { connectionType: UserConnection } = connectionDefinitions({ nodeType: usersType.objectType });
 
 const rootQuery = createRootQuery({
   users: {
