@@ -1,11 +1,10 @@
 import { commentsBaseType, commentsQueryArgs, usersBaseType, usersQueryArgs } from './base-schema';
-import { GraphQLObjectType, GraphQLSchema } from 'graphql';
+import { GraphQLSchema } from 'graphql';
 import { initGiraphyApp } from '../app';
 import { RelationQuery, TypeRootQuery } from '../schema/rdbms/rdbms-query';
 import { createRootQuery, QueryObjectType } from '../schema/query-object-type';
 
-import { forwardConnectionArgs, connectionDefinitions } from 'graphql-relay'
-import { executeQuery } from '../schema/rdbms/rdbms-schema';
+import { connectionDefinitions } from 'graphql-relay'
 
 const commentsType: QueryObjectType<any, any> = commentsBaseType.extend("Comments", {
   commentId: {
@@ -59,25 +58,5 @@ const rootQuery = createRootQuery({
 const schema = new GraphQLSchema({
   query: rootQuery
 });
-
-const schema2 = new GraphQLSchema({
-  query: new GraphQLObjectType({
-    name: "Query",
-    // @ts-ignore
-    fields: () => ({
-      users: {
-        type: UserConnection,
-        args: { ...usersQueryArgs, ...forwardConnectionArgs },
-        resolve: (source, args, context, info) => executeQuery(info, context),
-        sqlPaginate: true,
-        // @ts-ignore
-        sortKey: {
-          order: 'ASC',
-          key: 'user_id'
-        },
-      }
-    })
-  })
-})
 
 initGiraphyApp(schema);
