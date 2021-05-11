@@ -52,7 +52,7 @@
     "graphql-relay": "0.6.0"
   },
   "resolutions": {
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "yargs-parser": "18.1.2",
     "mem": "4.0.0"
   },
