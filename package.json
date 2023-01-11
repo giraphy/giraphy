@@ -47,7 +47,7 @@
     "join-monster": "2.1.2",
     "js-yaml": "^3.14.0",
     "jwks-rsa": "^1.8.0",
-    "knex": "^0.21.1",
+    "knex": "^2.4.0",
     "lodash": "^4.17.19",
     "graphql-relay": "0.6.0"
   },
